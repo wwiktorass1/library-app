@@ -1,0 +1,27 @@
+### Symfony framework ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+node_modules/
+.cache/
+
+### PHPUnit ###
+.phpunit.result.cache
+/phpunit.xml
+/.phpunit.cache/
+
+### Docker ###
+/docker/mysql/init.sql
+/docker/db/*.sql
+/docker-compose.override.yml
+
+### IDE (naudojant VS Code, PHPStorm) ###
+.idea/
+/.vscode/
+
+### Logai ###
+*.log
