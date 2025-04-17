@@ -12,5 +12,16 @@
     </head>
     <body>
         {% block body %}{% endblock %}
+        <nav>
+    {% if app.user %}
+        <span>Logged in as {{ app.user.userIdentifier }}</span>
+        <form method="post" action="{{ path('app_logout') }}">
+            <button class="btn btn-link">Logout</button>
+        </form>
+    {% else %}
+        <a href="{{ path('app_login') }}">Login</a>
+    {% endif %}
+</nav>
+
     </body>
 </html>
