@@ -3,6 +3,7 @@
 namespace App\Tests\Controller;
 
 use App\Entity\Book;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -17,127 +18,159 @@ final class BookControllerTest extends WebTestCase
 
     protected function setUp(): void
     {
-        $this->client = static::createClient();
+        $this->client = static::createClient(); 
         $this->manager = static::getContainer()->get('doctrine')->getManager();
         $this->bookRepository = $this->manager->getRepository(Book::class);
 
+        // Remove all books
         foreach ($this->bookRepository->findAll() as $object) {
             $this->manager->remove($object);
         }
 
+        // Remove all users
+        $this->manager->createQuery('DELETE FROM App\Entity\User')->execute();
+
         $this->manager->flush();
     }
 
-    public function testIndex(): void
+    public function testIndexRequiresLogin(): void
     {
-        $this->client->followRedirects();
-        $crawler = $this->client->request('GET', $this->path);
+        $this->client->request('GET', '/book');
 
-        self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Book index');
+        self::assertResponseRedirects('/login');
+    }
 
-        // Use the $crawler to perform additional assertions e.g.
-        // self::assertSame('Some text on the page', $crawler->filter('.p')->first());
+    public function testIndexAsLoggedInUser(): void
+    {
+        $user = new User();
+        $user->setEmail('test_'.uniqid().'@example.com');
+        $user->setPassword('$2y$13$mhBY6T9lfXSevU3yevtkzuptPaKdSQKmUdKMtcIn80vfiJCIYwJ9i'); // "test1234"
+        $user->setRoles(['ROLE_USER']);
+
+        $this->manager->persist($user);
+        $this->manager->flush();
+
+        $this->client->loginUser($user);
+        $crawler = $this->client->request('GET', '/book');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('h1', 'Book index');
     }
 
     public function testNew(): void
     {
-        $this->markTestIncomplete();
-        $this->client->request('GET', sprintf('%snew', $this->path));
+        $user = new User();
+        $user->setEmail('new_'.uniqid().'@example.com');
+        $user->setPassword('$2y$13$mhBY6T9lfXSevU3yevtkzuptPaKdSQKmUdKMtcIn80vfiJCIYwJ9i');
+        $user->setRoles(['ROLE_USER']);
+        $this->manager->persist($user);
+        $this->manager->flush();
+        $this->client->loginUser($user);
 
+        $this->client->request('GET', sprintf('%snew', $this->path));
         self::assertResponseStatusCodeSame(200);
 
         $this->client->submitForm('Save', [
             'book[title]' => 'Testing',
-            'book[author]' => 'Testing',
-            'book[isbn]' => 'Testing',
-            'book[publicationDate]' => 'Testing',
-            'book[genre]' => 'Testing',
-            'book[copies]' => 'Testing',
+            'book[author]' => 'Author',
+            'book[isbn]' => '1234567890',
+            'book[publicationDate]' => '2023-01-01',
+            'book[genre]' => 'Test',
+            'book[copies]' => 5,
         ]);
 
-        self::assertResponseRedirects($this->path);
-
+        self::assertResponseRedirects('/book');
         self::assertSame(1, $this->bookRepository->count([]));
     }
 
     public function testShow(): void
     {
-        $this->markTestIncomplete();
-        $fixture = new Book();
-        $fixture->setTitle('My Title');
-        $fixture->setAuthor('My Title');
-        $fixture->setIsbn('My Title');
-        $fixture->setPublicationDate('My Title');
-        $fixture->setGenre('My Title');
-        $fixture->setCopies('My Title');
+        $user = new User();
+        $user->setEmail('show_'.uniqid().'@example.com');
+        $user->setPassword('$2y$13$mhBY6T9lfXSevU3yevtkzuptPaKdSQKmUdKMtcIn80vfiJCIYwJ9i');
+        $user->setRoles(['ROLE_USER']);
+        $this->manager->persist($user);
+        $this->manager->flush();
+        $this->client->loginUser($user);
 
-        $this->manager->persist($fixture);
+        $book = new Book();
+        $book->setTitle('My Title');
+        $book->setAuthor('Author');
+        $book->setIsbn('1234567890');
+        $book->setPublicationDate(new \DateTime('2023-01-01'));
+        $book->setGenre('Genre');
+        $book->setCopies(3);
+
+        $this->manager->persist($book);
         $this->manager->flush();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
-
+        $this->client->request('GET', sprintf('%s%s', $this->path, $book->getId()));
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('Book');
-
-        // Use assertions to check that the properties are properly displayed.
     }
 
     public function testEdit(): void
     {
-        $this->markTestIncomplete();
-        $fixture = new Book();
-        $fixture->setTitle('Value');
-        $fixture->setAuthor('Value');
-        $fixture->setIsbn('Value');
-        $fixture->setPublicationDate('Value');
-        $fixture->setGenre('Value');
-        $fixture->setCopies('Value');
+        $user = new User();
+        $user->setEmail('edit_'.uniqid().'@example.com');
+        $user->setPassword('$2y$13$mhBY6T9lfXSevU3yevtkzuptPaKdSQKmUdKMtcIn80vfiJCIYwJ9i');
+        $user->setRoles(['ROLE_USER']);
+        $this->manager->persist($user);
+        $this->manager->flush();
+        $this->client->loginUser($user);
 
-        $this->manager->persist($fixture);
+        $book = new Book();
+        $book->setTitle('Old Title');
+        $book->setAuthor('Old Author');
+        $book->setIsbn('111');
+        $book->setPublicationDate(new \DateTime('2022-01-01'));
+        $book->setGenre('Old');
+        $book->setCopies(1);
+
+        $this->manager->persist($book);
         $this->manager->flush();
 
-        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
-
+        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $book->getId()));
         $this->client->submitForm('Update', [
-            'book[title]' => 'Something New',
-            'book[author]' => 'Something New',
-            'book[isbn]' => 'Something New',
-            'book[publicationDate]' => 'Something New',
-            'book[genre]' => 'Something New',
-            'book[copies]' => 'Something New',
+            'book[title]' => 'New Title',
+            'book[author]' => 'New Author',
+            'book[isbn]' => '222',
+            'book[publicationDate]' => '2023-01-01',
+            'book[genre]' => 'New',
+            'book[copies]' => 10,
         ]);
 
-        self::assertResponseRedirects('/book/');
+        self::assertResponseRedirects('/book');
+        $updatedBook = $this->bookRepository->find($book->getId());
 
-        $fixture = $this->bookRepository->findAll();
-
-        self::assertSame('Something New', $fixture[0]->getTitle());
-        self::assertSame('Something New', $fixture[0]->getAuthor());
-        self::assertSame('Something New', $fixture[0]->getIsbn());
-        self::assertSame('Something New', $fixture[0]->getPublicationDate());
-        self::assertSame('Something New', $fixture[0]->getGenre());
-        self::assertSame('Something New', $fixture[0]->getCopies());
+        self::assertSame('New Title', $updatedBook->getTitle());
     }
 
     public function testRemove(): void
     {
-        $this->markTestIncomplete();
-        $fixture = new Book();
-        $fixture->setTitle('Value');
-        $fixture->setAuthor('Value');
-        $fixture->setIsbn('Value');
-        $fixture->setPublicationDate('Value');
-        $fixture->setGenre('Value');
-        $fixture->setCopies('Value');
+        $user = new User();
+        $user->setEmail('remove_'.uniqid().'@example.com');
+        $user->setPassword('$2y$13$mhBY6T9lfXSevU3yevtkzuptPaKdSQKmUdKMtcIn80vfiJCIYwJ9i');
+        $user->setRoles(['ROLE_USER']);
+        $this->manager->persist($user);
+        $this->manager->flush();
+        $this->client->loginUser($user);
 
-        $this->manager->persist($fixture);
+        $book = new Book();
+        $book->setTitle('Title');
+        $book->setAuthor('Author');
+        $book->setIsbn('333');
+        $book->setPublicationDate(new \DateTime('2023-01-01'));
+        $book->setGenre('Genre');
+        $book->setCopies(2);
+
+        $this->manager->persist($book);
         $this->manager->flush();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
+        $this->client->request('GET', sprintf('%s%s', $this->path, $book->getId()));
         $this->client->submitForm('Delete');
 
-        self::assertResponseRedirects('/book/');
+        self::assertResponseRedirects('/book');
         self::assertSame(0, $this->bookRepository->count([]));
     }
 }
