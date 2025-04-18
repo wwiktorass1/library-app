@@ -73,7 +73,7 @@ final class BookControllerTest extends WebTestCase
         $this->client->submitForm('Save', [
             'book[title]' => 'Testing',
             'book[author]' => 'Author',
-            'book[isbn]' => '1234567890',
+            'book[isbn]' => '9783161484100',
             'book[publicationDate]' => '2023-01-01',
             'book[genre]' => 'Test',
             'book[copies]' => 5,
@@ -134,7 +134,7 @@ final class BookControllerTest extends WebTestCase
         $this->client->submitForm('Update', [
             'book[title]' => 'New Title',
             'book[author]' => 'New Author',
-            'book[isbn]' => '222',
+            'book[isbn]' => '9783161484100',
             'book[publicationDate]' => '2023-01-01',
             'book[genre]' => 'New',
             'book[copies]' => 10,

@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\BookRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BookRepository::class)]
 class Book
@@ -15,21 +16,32 @@ class Book
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 2, max: 255)]
     private ?string $title = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 2, max: 255)]
     private ?string $author = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Isbn(type: "isbn13", message: "Please enter a valid ISBN-13.")]
     private ?string $isbn = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotNull]
+    #[Assert\LessThanOrEqual("today", message: "Publication date cannot be in the future.")]
     private ?\DateTimeInterface $publicationDate = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
     private ?string $genre = null;
 
     #[ORM\Column]
+    #[Assert\NotNull]
+    #[Assert\PositiveOrZero(message: "Copies must be zero or a positive number.")]
     private ?int $copies = null;
 
     public function getId(): ?int
@@ -78,7 +90,7 @@ class Book
         return $this->publicationDate;
     }
 
-    public function setPublicationDate(\DateTimeInterface $publicationDate): static
+    public function setPublicationDate(?\DateTimeInterface $publicationDate): static
     {
         $this->publicationDate = $publicationDate;
 
