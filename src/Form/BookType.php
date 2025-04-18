@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Book;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -15,12 +16,11 @@ class BookType extends AbstractType
             ->add('title')
             ->add('author')
             ->add('isbn')
-            ->add('publicationDate', null, [
+            ->add('publicationDate', DateType::class, [ 
                 'widget' => 'single_text',
             ])
             ->add('genre')
-            ->add('copies')
-        ;
+            ->add('copies');
     }
 
     public function configureOptions(OptionsResolver $resolver): void
