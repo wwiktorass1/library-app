@@ -107,3 +107,16 @@ Password: `test1234`
 
 ---
 
+## ✅ Features
+
+- [x] User registration and login with form-based authentication
+- [x] CRUD operations for Book entity
+- [x] Form validation using Symfony Validator (e.g., ISBN, Date, Required fields)
+- [x] Functional tests with PHPUnit:
+  - 12 tests, 34 assertions (form, access control, CRUD)
+- [x] Dockerized environment with MySQL
+- [x] CSRF protection in forms
+
+---
+
+
