@@ -17,3 +17,18 @@ class BookRepository extends ServiceEntityRepository
     }
 
 }
+public function searchByTitleOrAuthor(?string $query): array
+{
+    $query = trim((string) $query);
+
+    // Jeigu paieška tuščia arba per trumpa – grąžinam tuščią masyvą
+    if ($query === '' || strlen($query) < 2) {
+        return [];
+    }
+
+    return $this->createQueryBuilder('b')
+        ->where('b.title LIKE :q OR b.author LIKE :q')
+        ->setParameter('q', '%' . $query . '%')
+        ->getQuery()
+        ->getResult();
+}
