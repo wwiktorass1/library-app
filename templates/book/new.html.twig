@@ -7,5 +7,14 @@
 
     {{ include('book/_form.html.twig') }}
 
-    <a href="{{ path('app_book_index') }}">back to list</a>
+    <form id="book-form" name="book" method="post" action="{{ path('app_book_new') }}">
+        {# tavo formos laukai čia #}
+        <button type="submit">Save</button>
+    </form>
+
+    <div id="book-list">
+        {# čia bus atnaujintas sąrašas per AJAX, jei norėsi #}
+    </div>
+
+    <a href="{{ path('app_book_index') }}">Back to list</a>
 {% endblock %}

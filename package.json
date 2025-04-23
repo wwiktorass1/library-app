@@ -1,0 +1,36 @@
+{
+    "devDependencies": {
+        "@babel/core": "^7.17.0",
+        "@babel/preset-env": "^7.16.0",
+        "@symfony/webpack-encore": "^5.1.0",
+        "core-js": "^3.41.0",
+        "regenerator-runtime": "^0.13.11",
+        "webpack": "^5.99.6",
+        "webpack-cli": "^5.1.4"
+    },
+    "license": "UNLICENSED",
+    "private": true,
+    "scripts": {
+        "dev-server": "encore dev-server",
+        "dev": "encore dev",
+        "watch": "encore dev --watch",
+        "build": "encore production --progress"
+    },
+    "name": "library_app",
+    "version": "1.0.0",
+    "description": "This is a Symfony-based Library Management web application.",
+    "main": "webpack.config.js",
+    "directories": {
+        "test": "tests"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/wwiktorass1/library-app.git"
+    },
+    "keywords": [],
+    "author": "",
+    "bugs": {
+        "url": "https://github.com/wwiktorass1/library-app/issues"
+    },
+    "homepage": "https://github.com/wwiktorass1/library-app#readme"
+}
