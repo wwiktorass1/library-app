@@ -5,16 +5,12 @@
 {% block body %}
     <h1>Create new Book</h1>
 
-    {{ include('book/_form.html.twig') }}
+    {{ form_start(form, {'attr': {'id': 'book-form'}}) }}
+        {{ form_widget(form) }}
+        <button class="btn btn-primary">Save</button>
+    {{ form_end(form) }}
 
-    <form id="book-form" name="book" method="post" action="{{ path('app_book_new') }}">
-        {# tavo formos laukai čia #}
-        <button type="submit">Save</button>
-    </form>
+    <a href="{{ path('app_book_index') }}">back to list</a>
 
-    <div id="book-list">
-        {# čia bus atnaujintas sąrašas per AJAX, jei norėsi #}
-    </div>
-
-    <a href="{{ path('app_book_index') }}">Back to list</a>
+    <div id="book-list"></div>
 {% endblock %}

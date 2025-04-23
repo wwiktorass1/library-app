@@ -5,20 +5,25 @@
 {% block body %}
     <h1>Book index</h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Isbn</th>
-                <th>PublicationDate</th>
-                <th>Genre</th>
-                <th>Copies</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
+    {# Paieškos laukas #}
+    <input type="text" id="search-input" placeholder="Search books..." class="form-control mb-3">
+
+    {# Lentelė su knygomis #}
+    <div id="book-list">
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Isbn</th>
+            <th>Publication Date</th>
+            <th>Genre</th>
+            <th>Copies</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
         {% for book in books %}
             <tr>
                 <td>{{ book.id }}</td>
@@ -29,17 +34,18 @@
                 <td>{{ book.genre }}</td>
                 <td>{{ book.copies }}</td>
                 <td>
-                    <a href="{{ path('app_book_show', {'id': book.id}) }}">show</a>
-                    <a href="{{ path('app_book_edit', {'id': book.id}) }}">edit</a>
+                    <a href="{{ path('app_book_show', {'id': book.id}) }}" class="btn btn-sm btn-info">Show</a>
+                    <a href="{{ path('app_book_edit', {'id': book.id}) }}" class="btn btn-sm btn-warning">Edit</a>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="8">no records found</td>
+                <td colspan="8" class="text-center">No results found.</td>
             </tr>
         {% endfor %}
-        </tbody>
-    </table>
+    </tbody>
+</table>
+    </div>
 
-    <a href="{{ path('app_book_new') }}">Create new</a>
+    <a href="{{ path('app_book_new') }}" class="btn btn-primary">Create new</a>
 {% endblock %}

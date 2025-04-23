@@ -20,4 +20,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    const searchInput = document.getElementById('search-input');
+    const bookList = document.getElementById('book-list');
+
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function () {
+            fetch(`/book/search?q=${encodeURIComponent(this.value)}`)
+                .then(response => response.text())
+                .then(html => {
+                    bookList.innerHTML = html;
+                });
+        });
+    }
 });

@@ -1,7 +1,17 @@
 {% for book in books %}
-    <div>
-        <strong>{{ book.title }}</strong> by {{ book.author }}
-    </div>
+    {% if book.id %}
+        <div class="book-item border rounded p-2 mb-2">
+            <strong>{{ book.title|e }}</strong> by {{ book.author|e }}<br>
+            ISBN: {{ book.isbn|e }} | Genre: {{ book.genre|e }}<br>
+            Publication: {{ book.publicationDate ? book.publicationDate|date('Y-m-d') : 'N/A' }}
+            <div class="mt-2">
+                <a href="{{ path('app_book_show', {'id': book.id}) }}" class="btn btn-sm btn-outline-info">Show</a>
+                <a href="{{ path('app_book_edit', {'id': book.id}) }}" class="btn btn-sm btn-outline-warning">Edit</a>
+            </div>
+        </div>
+    {% else %}
+        <div class="text-danger">⚠️ Book has no ID — cannot show or edit</div>
+    {% endif %}
 {% else %}
     <div>No books found.</div>
 {% endfor %}

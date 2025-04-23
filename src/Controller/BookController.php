@@ -43,8 +43,12 @@ final class BookController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_book_show', methods: ['GET'])]
-    public function show(Book $book): Response
+    public function show(?Book $book): Response
     {
+        if (!$book) {
+            throw $this->createNotFoundException('Book not found');
+        }
+    
         return $this->render('book/show.html.twig', [
             'book' => $book,
         ]);
@@ -77,5 +81,22 @@ final class BookController extends AbstractController
         }
 
         return $this->redirectToRoute('app_book_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/search', name: 'book_search', methods: ['GET'])]
+    public function search(Request $request, BookRepository $bookRepository): Response
+    {
+        $query = $request->query->get('q', '');
+        $books = $bookRepository->createQueryBuilder('b')
+            ->where('b.title LIKE :q OR b.author LIKE :q')
+            ->setParameter('q', '%' . $query . '%')
+            ->getQuery()
+            ->getResult();
+            dump($books); die;
+
+
+        return $this->render('book/_list.html.twig', [
+            'books' => $books,
+        ]);
     }
 }
