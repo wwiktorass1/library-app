@@ -78,6 +78,14 @@
         "symfony": {
             "allow-contrib": false,
             "require": "7.2.*"
-        }
+            }
+        },
+        "authors": [
+            {
+                "name": "Viktoras Vorobjovas",
+                "email": "viktorasvorobjovas87@gmail.com",
+                "role": "Developer"
+            }
+        ]
     }
-}
+
