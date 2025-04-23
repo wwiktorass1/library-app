@@ -173,4 +173,21 @@ final class BookControllerTest extends WebTestCase
         self::assertResponseRedirects('/book');
         self::assertSame(0, $this->bookRepository->count([]));
     }
+    public function testIndexPageLoadsSuccessfully(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/book');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('h1', 'Book index');
+    }
+
+    public function testSearchReturnsResult(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/book/search?q=Mano');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists('.book-item'); 
+    }
 }
