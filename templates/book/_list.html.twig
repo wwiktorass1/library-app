@@ -1,0 +1,7 @@
+{% for book in books %}
+    <div>
+        <strong>{{ book.title }}</strong> by {{ book.author }}
+    </div>
+{% else %}
+    <div>No books found.</div>
+{% endfor %}
