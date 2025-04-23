@@ -83,18 +83,21 @@ final class BookController extends AbstractController
         return $this->redirectToRoute('app_book_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    #[Route('/search', name: 'book_search', methods: ['GET'])]
+    #[Route('/book/search', name: 'book_search', methods: ['GET'])]
     public function search(Request $request, BookRepository $bookRepository): Response
     {
-        $query = $request->query->get('q', '');
-        $books = $bookRepository->createQueryBuilder('b')
-            ->where('b.title LIKE :q OR b.author LIKE :q')
-            ->setParameter('q', '%' . $query . '%')
-            ->getQuery()
-            ->getResult();
-            dump($books); die;
-
-
+        $query = trim($request->query->get('q', ''));
+    
+        if ($query === '') {
+            $books = [];
+        } else {
+            $books = $bookRepository->createQueryBuilder('b')
+                ->where('b.title LIKE :q OR b.author LIKE :q')
+                ->setParameter('q', '%' . $query . '%')
+                ->getQuery()
+                ->getResult();
+        }
+    
         return $this->render('book/_list.html.twig', [
             'books' => $books,
         ]);
