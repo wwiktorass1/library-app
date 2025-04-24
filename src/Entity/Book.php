@@ -6,42 +6,55 @@ use App\Repository\BookRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use OpenApi\Attributes as OA;
 
 #[ORM\Entity(repositoryClass: BookRepository::class)]
+#[OA\Schema(
+    title: "Book",
+    description: "A book entity representing a single library book",
+    required: ["title", "author", "isbn", "publicationDate", "genre", "copies"]
+)]
 class Book
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[OA\Property(description: "The unique identifier of the book")]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 2, max: 255)]
+    #[OA\Property(example: "The Great Gatsby")]
     private ?string $title = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 2, max: 255)]
+    #[OA\Property(example: "F. Scott Fitzgerald")]
     private ?string $author = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
     #[Assert\Isbn(type: "isbn13", message: "Please enter a valid ISBN-13.")]
+    #[OA\Property(example: "9780306406157")]
     private ?string $isbn = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Assert\NotNull]
     #[Assert\LessThanOrEqual("today", message: "Publication date cannot be in the future.")]
+    #[OA\Property(type: "string", format: "date", example: "2024-01-01")]
     private ?\DateTimeInterface $publicationDate = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
+    #[OA\Property(example: "Fiction")]
     private ?string $genre = null;
 
     #[ORM\Column]
     #[Assert\NotNull]
     #[Assert\PositiveOrZero(message: "Copies must be zero or a positive number.")]
+    #[OA\Property(example: 5)]
     private ?int $copies = null;
 
     public function getId(): ?int
@@ -57,7 +70,6 @@ class Book
     public function setTitle(string $title): static
     {
         $this->title = $title;
-
         return $this;
     }
 
@@ -69,7 +81,6 @@ class Book
     public function setAuthor(string $author): static
     {
         $this->author = $author;
-
         return $this;
     }
 
@@ -81,7 +92,6 @@ class Book
     public function setIsbn(string $isbn): static
     {
         $this->isbn = $isbn;
-
         return $this;
     }
 
@@ -93,7 +103,6 @@ class Book
     public function setPublicationDate(?\DateTimeInterface $publicationDate): static
     {
         $this->publicationDate = $publicationDate;
-
         return $this;
     }
 
@@ -105,7 +114,6 @@ class Book
     public function setGenre(string $genre): static
     {
         $this->genre = $genre;
-
         return $this;
     }
 
@@ -117,7 +125,6 @@ class Book
     public function setCopies(int $copies): static
     {
         $this->copies = $copies;
-
         return $this;
     }
 }
