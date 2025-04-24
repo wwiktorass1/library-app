@@ -1,42 +1,25 @@
 import $ from 'jquery';
 
 $(function () {
-    $('#book-form').on('submit', function (e) {
+    $(document).on('submit', '#book-form', function (e) {
         e.preventDefault();
-
         const $form = $(this);
-        const action = $form.attr('action');
-        const method = $form.attr('method');
+
+        $('.form-error-message').text('');
 
         $.ajax({
-            url: action,
-            method: method,
+            url: $form.attr('action'),
+            method: $form.attr('method'),
             data: $form.serialize(),
             success: function () {
-                const successMessage = `
-                    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
-                        ✅ Book successfully created!
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                `;
-                $('#book-form').before(successMessage);
-
-                setTimeout(() => {
-                    window.location.href = '/book';
-                }, 2000);
+                window.location.href = '/book';
             },
             error: function (xhr) {
-                const response = xhr.responseText;
-                const newDom = $('<div>').html(response);
-                const newForm = newDom.find('#book-form');
-
-                if (newForm.length) {
-                    $('#book-form').replaceWith(newForm);
+                if (xhr.status === 422 || xhr.status === 400) {
+                    $('#form-container').html(xhr.responseText);
                 } else {
-                    alert('Something went wrong. Please try again.');
+                    console.error('Unexpected error:', xhr);
                 }
-
-                console.error('Form error response:', response);
             }
         });
     });

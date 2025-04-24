@@ -1,4 +1,79 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+{{ form_start(form, {'attr': {'id': 'book-form', 'novalidate': 'novalidate'}}) }}
+
+<div class="mb-3">
+    {{ form_label(form.title) }}
+    {{ form_widget(form.title, {
+        'attr': {
+            'class': 'form-control' ~ (form_errors(form.title) ? ' is-invalid' : '')
+        }
+    }) }}
+    <div class="form-error-message text-danger">
+        {{ form_errors(form.title) }}
+    </div>
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.author) }}
+    {{ form_widget(form.author, {
+        'attr': {
+            'class': 'form-control' ~ (form_errors(form.author) ? ' is-invalid' : '')
+        }
+    }) }}
+    <div class="form-error-message text-danger">
+        {{ form_errors(form.author) }}
+    </div>
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.isbn) }}
+    {{ form_widget(form.isbn, {
+        'attr': {
+            'class': 'form-control' ~ (form_errors(form.isbn) ? ' is-invalid' : '')
+        }
+    }) }}
+    <div class="form-error-message text-danger">
+        {{ form_errors(form.isbn) }}
+    </div>
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.publicationDate) }}
+    {{ form_widget(form.publicationDate, {
+        'attr': {
+            'class': 'form-control' ~ (form_errors(form.publicationDate) ? ' is-invalid' : '')
+        }
+    }) }}
+    <div class="form-error-message text-danger">
+        {{ form_errors(form.publicationDate) }}
+    </div>
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.genre) }}
+    {{ form_widget(form.genre, {
+        'attr': {
+            'class': 'form-control' ~ (form_errors(form.genre) ? ' is-invalid' : '')
+        }
+    }) }}
+    <div class="form-error-message text-danger">
+        {{ form_errors(form.genre) }}
+    </div>
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.copies) }}
+    {{ form_widget(form.copies, {
+        'attr': {
+            'class': 'form-control' ~ (form_errors(form.copies) ? ' is-invalid' : '')
+        }
+    }) }}
+    <div class="form-error-message text-danger">
+        {{ form_errors(form.copies) }}
+    </div>
+</div>
+
+<button class="btn btn-primary">
+    {{ button_label|default('Save') }}
+</button>
+
 {{ form_end(form) }}

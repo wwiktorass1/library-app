@@ -30,7 +30,7 @@ final class BookController extends AbstractController
         ]);
     }
 
-    #[Route('/book/new', name: 'app_book_new', methods: ['GET', 'POST'])]
+        #[Route('/book/new', name: 'app_book_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $book = new Book();
@@ -41,7 +41,17 @@ final class BookController extends AbstractController
             $entityManager->persist($book);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_book_index', [], Response::HTTP_SEE_OTHER);
+            if ($request->isXmlHttpRequest()) {
+                return new Response(null, 204); // No Content
+            }
+
+            return $this->redirectToRoute('app_book_index');
+        }
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('book/_form.html.twig', [
+                'form' => $form,
+            ], new Response('', 400));
         }
 
         return $this->render('book/new.html.twig', [
@@ -49,6 +59,8 @@ final class BookController extends AbstractController
             'form' => $form,
         ]);
     }
+
+    
 
     #[Route('/book/search', name: 'app_book_search', methods: ['GET'])]
     public function search(Request $request, BookRepository $bookRepository): Response
@@ -101,5 +113,5 @@ final class BookController extends AbstractController
 
         return $this->redirectToRoute('app_book_index', [], Response::HTTP_SEE_OTHER);
     }
-
+        
 }
