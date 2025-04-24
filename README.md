@@ -217,3 +217,18 @@ This project includes full API documentation using **NelmioApiDocBundle** and th
 ### How to Access
 
 Make sure your Docker environment is running and the application is accessible at `http://localhost:8000`. Then navigate to `/api/doc` in your browser to view the Swagger interface.
+---
+### 📡 AJAX Form Submission
+
+This project supports asynchronous (AJAX) form submission for book creation:
+
+- When submitted via JavaScript (`XMLHttpRequest`), the `/book/new` endpoint:
+  - Returns `204 No Content` on successful creation.
+  - Returns `400 Bad Request` and renders form partial with validation errors if input is invalid.
+
+Example error response (partial HTML):
+
+```html
+<div class="form-error-message text-danger title-error">
+    This value should not be blank
+</div>
