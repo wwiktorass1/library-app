@@ -5,46 +5,53 @@
 {% block body %}
     <h1>Book index</h1>
 
-    {# Paieškos laukas #}
+
     <input type="text" id="search-input" placeholder="Search books..." class="form-control mb-3">
 
-    {# Lentelė su knygomis #}
+ 
     <div id="book-list">
-<table class="table">
-    <thead>
-        <tr>
-            <th>Id</th>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Isbn</th>
-            <th>Publication Date</th>
-            <th>Genre</th>
-            <th>Copies</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for book in books %}
-            <tr>
-                <td>{{ book.id }}</td>
-                <td>{{ book.title }}</td>
-                <td>{{ book.author }}</td>
-                <td>{{ book.isbn }}</td>
-                <td>{{ book.publicationDate ? book.publicationDate|date('Y-m-d') : '' }}</td>
-                <td>{{ book.genre }}</td>
-                <td>{{ book.copies }}</td>
-                <td>
-                    <a href="{{ path('app_book_show', {'id': book.id}) }}" class="btn btn-sm btn-info">Show</a>
-                    <a href="{{ path('app_book_edit', {'id': book.id}) }}" class="btn btn-sm btn-warning">Edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="8" class="text-center">No results found.</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Isbn</th>
+                    <th>Publication Date</th>
+                    <th>Genre</th>
+                    <th>Copies</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                    <tr class="book-item">
+                        <td>{{ book.id }}</td>
+                        <td>{{ book.title }}</td>
+                        <td>{{ book.author }}</td>
+                        <td>{{ book.isbn }}</td>
+                        <td>{{ book.publicationDate ? book.publicationDate|date('Y-m-d') : '' }}</td>
+                        <td>{{ book.genre }}</td>
+                        <td>{{ book.copies }}</td>
+                        <td>
+                            <a href="{{ path('app_book_show', {'id': book.id}) }}" class="btn btn-sm btn-info">Show</a>
+                            <a href="{{ path('app_book_edit', {'id': book.id}) }}" class="btn btn-sm btn-warning">Edit</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center">No results found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="pagination">
+        {% if books|length > 0 %}
+            {{ knp_pagination_render(books) }}
+        {% endif %}
     </div>
 
     <a href="{{ path('app_book_new') }}" class="btn btn-primary">Create new</a>

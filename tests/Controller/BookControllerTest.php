@@ -175,19 +175,47 @@ final class BookControllerTest extends WebTestCase
     }
     public function testIndexPageLoadsSuccessfully(): void
     {
-        $client = static::createClient();
-        $client->request('GET', '/book');
-
+        $user = new User();
+        $user->setEmail('index_test_'.uniqid().'@example.com');
+        $user->setPassword('$2y$13$mhBY6T9lfXSevU3yevtkzuptPaKdSQKmUdKMtcIn80vfiJCIYwJ9i');
+        $user->setRoles(['ROLE_USER']);
+    
+        $this->manager->persist($user);
+        $this->manager->flush();
+    
+        $this->client->loginUser($user);
+    
+        $this->client->request('GET', '/book');
+    
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('h1', 'Book index');
     }
 
     public function testSearchReturnsResult(): void
     {
-        $client = static::createClient();
-        $client->request('GET', '/book/search?q=Mano');
-
+        $user = new User();
+        $user->setEmail('search_test_'.uniqid().'@example.com');
+        $user->setPassword('$2y$13$mhBY6T9lfXSevU3yevtkzuptPaKdSQKmUdKMtcIn80vfiJCIYwJ9i');
+        $user->setRoles(['ROLE_USER']);
+    
+        $this->manager->persist($user);
+    
+        $book = new Book();
+        $book->setTitle('Mano knyga');
+        $book->setAuthor('Autorius');
+        $book->setIsbn('1234567890123');
+        $book->setPublicationDate(new \DateTime('2024-01-01'));
+        $book->setGenre('Fikcija');
+        $book->setCopies(1);
+    
+        $this->manager->persist($book);
+        $this->manager->flush();
+    
+        $this->client->loginUser($user);
+        $this->client->request('GET', '/book/search?q=Mano');
+    
         $this->assertResponseIsSuccessful();
-        $this->assertSelectorExists('.book-item'); 
+        $this->assertSelectorExists('.book-item');
     }
+    
 }
