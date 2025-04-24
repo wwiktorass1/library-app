@@ -232,3 +232,51 @@ Example error response (partial HTML):
 <div class="form-error-message text-danger title-error">
     This value should not be blank
 </div>
+---
+## 📐 Architectural decisions
+
+This project follows **Symfony best practices** with clear separation of concerns:
+
+- **MVC pattern** is used to isolate business logic (`Controller`, `Entity`, `Twig`).
+- **Service layer** handles logic beyond controllers (e.g., data processing, validation).
+- **Repository pattern** is used for custom queries and search logic.
+- **FormType classes** help encapsulate form and validation logic.
+- **Doctrine ORM** handles all data persistence with proper constraints.
+- **AJAX interactions** are handled via `XMLHttpRequest` and Symfony responses.
+- **Validation is layered**:
+  - Entity-level constraints (e.g., `@Assert`)
+  - Form-level error rendering
+  - AJAX-safe validation feedback
+
+## 💡 Challenges & Solutions
+
+| Challenge | Solution |
+|----------|----------|
+| Preventing circular references in entity serialization | Used groups in API responses and disabled circular reference handler |
+| Supporting both AJAX and regular form submissions | Detected `isXmlHttpRequest()` and rendered partial form template on failure |
+| Making validation testable in both form and API | Reused the same `BookType` with constraints in all controllers and ensured test coverage |
+| Avoiding route conflicts (e.g. `/book/search` vs `/book/{id}`) | Ordered routes properly in controller (specific before dynamic) |
+
+## 🚀 Deployment instructions
+
+This application can be deployed using Docker on any cloud platform:
+
+```bash
+# Build the Docker image
+docker build -t library-app .
+
+# Run the container in production mode
+docker run -d -p 8000:8000 -e APP_ENV=prod library-app
+```
+
+After the container is running:
+
+```bash
+# Run database migrations
+docker exec -it <container_id> php bin/console doctrine:migrations:migrate --no-interaction
+
+# Warm up the cache
+docker exec -it <container_id> php bin/console cache:warmup
+```
+
+> Replace `<container_id>` with the actual container ID from `docker ps`.
