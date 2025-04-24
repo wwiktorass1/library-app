@@ -44,14 +44,16 @@ final class BookController extends AbstractController
 
     #[Route('/book/new', name: 'app_book_new', methods: ['GET', 'POST'])]
     #[OA\Post(
-        summary: 'Create a new book',
+        summary: 'Create a new book (supports AJAX)',
+        description: 'This endpoint handles book creation via HTML form or JavaScript (AJAX) submission. If submitted via AJAX, it returns 204 No Content on success and 400 on validation error.',
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(ref: new Model(type: Book::class))
         ),
         responses: [
             new OA\Response(response: 201, description: 'Book created successfully'),
-            new OA\Response(response: 400, description: 'Validation failed')
+            new OA\Response(response: 204, description: 'Book created successfully via AJAX (no content)'),
+            new OA\Response(response: 400, description: 'Validation error (e.g., when submitting via AJAX)')
         ]
     )]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
@@ -65,7 +67,7 @@ final class BookController extends AbstractController
             $entityManager->flush();
 
             if ($request->isXmlHttpRequest()) {
-                return new Response(null, 201); // Created
+                return new Response(null, 201); 
             }
 
             return $this->redirectToRoute('app_book_index');
