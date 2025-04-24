@@ -193,3 +193,27 @@ Feel free to fork, customize, and extend it as needed!
 ---
 
 > Created with ❤️ using Symfony 6 and Docker.
+
+---
+
+## 📘 API Documentation (OpenAPI / Swagger)
+
+This project includes full API documentation using **NelmioApiDocBundle** and the **OpenAPI 3** specification.
+
+- Swagger UI: [http://localhost:8000/api/doc](http://localhost:8000/api/doc)
+- Raw JSON: [http://localhost:8000/api/doc.json](http://localhost:8000/api/doc.json)
+
+### Available Endpoints
+
+| Method   | Endpoint             | Description                              |
+|----------|----------------------|------------------------------------------|
+| `GET`    | `/book`              | Retrieve a paginated list of books       |
+| `POST`   | `/book/new`          | Create a new book                        |
+| `GET`    | `/book/search?q=...` | Search for books by title or author      |
+| `GET`    | `/book/{id}`         | Get a single book by ID                  |
+| `PUT`    | `/book/{id}/edit`    | Update an existing book                  |
+| `DELETE` | `/book/{id}`         | Delete a book                            |
+
+### How to Access
+
+Make sure your Docker environment is running and the application is accessible at `http://localhost:8000`. Then navigate to `/api/doc` in your browser to view the Swagger interface.
