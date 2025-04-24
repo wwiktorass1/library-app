@@ -4,26 +4,51 @@
         <meta charset="UTF-8">
         <title>{% block title %}Welcome!{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
 
+        <!-- Bootstrap CSS  -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+              rel="stylesheet"
+              integrity="sha384-Gtvz7WvM4mIjLADZPuxfTUBn1zGeMZCgA2CnCBuEY3zmKtdUp8Z28hQXe3zW7QDw"
+              crossorigin="anonymous">
+    </head>
+    <body class="bg-light">
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom px-4 py-2 mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">Library App</a>
+                <div class="d-flex">
+                    {% if app.user %}
+                        <span class="me-3">Logged in as <strong>{{ app.user.userIdentifier }}</strong></span>
+                        <form method="post" action="{{ path('app_logout') }}">
+                            <button class="btn btn-outline-secondary btn-sm">Logout</button>
+                        </form>
+                    {% else %}
+                        <a href="{{ path('app_login') }}" class="btn btn-outline-primary btn-sm">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <div class="container">
+            {% block body %}{% endblock %}
+        </div>
+
+        <!-- Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-ENjdO4Dr2bkBIFxQpeoYz1HiPTK+J2zF3eupZrpuL1MRYx5nZz1S/t1PbL0W8VdO"
+                crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+                integrity="sha256-/xUj+3OJ+Y6G2SbVOJzt/5s2pU2aQ9Mf4i3zrgq4WYI="
+                crossorigin="anonymous"></script>
+
         {% block javascripts %}
             {{ encore_entry_script_tags('app') }}
         {% endblock %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-        <nav>
-    {% if app.user %}
-        <span>Logged in as {{ app.user.userIdentifier }}</span>
-        <form method="post" action="{{ path('app_logout') }}">
-            <button class="btn btn-link">Logout</button>
-        </form>
-    {% else %}
-        <a href="{{ path('app_login') }}">Login</a>
-    {% endif %}
-</nav>
-
     </body>
 </html>

@@ -32,5 +32,8 @@
     "bugs": {
         "url": "https://github.com/wwiktorass1/library-app/issues"
     },
-    "homepage": "https://github.com/wwiktorass1/library-app#readme"
+    "homepage": "https://github.com/wwiktorass1/library-app#readme",
+    "dependencies": {
+        "jquery": "^3.7.1"
+    }
 }
