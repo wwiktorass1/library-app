@@ -1,3 +1,4 @@
+
 # Library App
 
 This is a Symfony-based Library Management web application.
@@ -10,6 +11,8 @@ This is a Symfony-based Library Management web application.
 - Remember-me login option
 - Functional tests with PHPUnit
 - Dockerized environment (PHP + MySQL)
+- AJAX-powered dynamic search
+- Pagination for book listing
 
 ---
 
@@ -59,6 +62,23 @@ You can:
 - Create a new book
 - View the list
 - Edit or delete existing books
+- Use AJAX-powered search
+
+---
+
+## 🔍 AJAX Search
+
+- Real-time search is available on the book list page
+- Uses native JavaScript and `fetch()` to query `/book/search?q=...`
+- Results are dynamically updated without page reload
+
+---
+
+## 📄 Pagination
+
+- The book list at `/book` is paginated
+- Powered by `KnpPaginatorBundle`
+- Displays up to 10 books per page
 
 ---
 
@@ -66,29 +86,30 @@ You can:
 
 ### Run all tests:
 ```bash
-docker exec -it library_app-php-1 bash
-php bin/phpunit
+docker exec -it library_app-php-1 php bin/phpunit
 ```
 
----
+## 🧪 Functional Tests
 
-## 🏑 Technologies Used
-- Symfony 6.x
-- Doctrine ORM
-- Twig templates
-- PHPUnit for testing
-- Docker / docker-compose
-- MySQL 8
+This project includes functional tests that cover:
+- ✅ Book creation with valid and invalid data
+- ✅ Book listing pagination on `/book`
+- ✅ AJAX search via `/book/search`
+
+Each test:
+- Truncates `book` and `user` tables before execution
+- Ensures a test user `naujokas@example.com` with password `test1234` exists
+- Uses Symfony’s `WebTestCase` with the `KernelBrowser` client
 
 ---
 
 ## 🚪 Access Control
 
-| Route | Access |
-|-------|--------|
-| `/register` | Public |
-| `/login`    | Public |
-| `/book/*`   | ROLE_USER only |
+| Route        | Access         |
+|--------------|----------------|
+| `/register`  | Public         |
+| `/login`     | Public         |
+| `/book/*`    | ROLE_USER only |
 
 ---
 
@@ -103,20 +124,18 @@ INSERT INTO user (email, roles, password) VALUES (
   '$2y$13$mhBY6T9lfXSevU3yevtkzuptPaKdSQKmUdKMtcIn80vfiJCIYwJ9i'
 );
 ```
+
 Password: `test1234`
 
 ---
 
-## ✅ Features
+## ✅ Feature Checklist
 
 - [x] User registration and login with form-based authentication
 - [x] CRUD operations for Book entity
 - [x] Form validation using Symfony Validator (e.g., ISBN, Date, Required fields)
-- [x] Functional tests with PHPUnit:
-  - 12 tests, 34 assertions (form, access control, CRUD)
+- [x] Functional tests with PHPUnit
 - [x] Dockerized environment with MySQL
 - [x] CSRF protection in forms
-
----
-
-
+- [x] AJAX-powered book search
+- [x] Pagination support for book list
