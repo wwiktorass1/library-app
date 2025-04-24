@@ -217,8 +217,10 @@ This project includes full API documentation using **NelmioApiDocBundle** and th
 ### How to Access
 
 Make sure your Docker environment is running and the application is accessible at `http://localhost:8000`. Then navigate to `/api/doc` in your browser to view the Swagger interface.
+
 ---
-### 📡 AJAX Form Submission
+
+## 📡 AJAX Form Submission
 
 This project supports asynchronous (AJAX) form submission for book creation:
 
@@ -232,7 +234,10 @@ Example error response (partial HTML):
 <div class="form-error-message text-danger title-error">
     This value should not be blank
 </div>
+```
+
 ---
+
 ## 📐 Architectural decisions
 
 This project follows **Symfony best practices** with clear separation of concerns:
@@ -248,6 +253,8 @@ This project follows **Symfony best practices** with clear separation of concern
   - Form-level error rendering
   - AJAX-safe validation feedback
 
+---
+
 ## 💡 Challenges & Solutions
 
 | Challenge | Solution |
@@ -257,9 +264,13 @@ This project follows **Symfony best practices** with clear separation of concern
 | Making validation testable in both form and API | Reused the same `BookType` with constraints in all controllers and ensured test coverage |
 | Avoiding route conflicts (e.g. `/book/search` vs `/book/{id}`) | Ordered routes properly in controller (specific before dynamic) |
 
+---
+
 ## 🚀 Deployment instructions
 
 This application can be deployed using Docker on any cloud platform:
+
+### 1. Build and run the Docker container
 
 ```bash
 # Build the Docker image
@@ -269,7 +280,7 @@ docker build -t library-app .
 docker run -d -p 8000:8000 -e APP_ENV=prod library-app
 ```
 
-After the container is running:
+### 2. After the container is running:
 
 ```bash
 # Run database migrations
