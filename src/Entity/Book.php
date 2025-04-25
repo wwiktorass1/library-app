@@ -46,16 +46,23 @@ class Book
     #[OA\Property(type: "string", format: "date", example: "2024-01-01")]
     private ?\DateTimeInterface $publicationDate = null;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
-    #[OA\Property(example: "Fiction")]
-    private ?string $genre = null;
-
     #[ORM\Column]
     #[Assert\NotNull]
     #[Assert\PositiveOrZero(message: "Copies must be zero or a positive number.")]
     #[OA\Property(example: 5)]
     private ?int $copies = null;
+
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Genre should not be blank.")]
+    #[Assert\Length(
+        min: 2,
+        max: 255,
+        minMessage: "This value is too short",
+        maxMessage: "This value is too long"
+    )]
+    #[OA\Property(example: "Fiction", description: "Genre of the book (min 2 characters)")]
+    private ?string $genre = null;
+    
 
     public function getId(): ?int
     {

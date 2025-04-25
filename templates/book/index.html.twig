@@ -3,56 +3,77 @@
 {% block title %}Book index{% endblock %}
 
 {% block body %}
-    <h1>Book index</h1>
+    <div class="container">
+        <h1 class="my-4">Book Index</h1>
 
+        <!-- Search bar -->
+        <div class="mb-3">
+            <input type="text" id="search-input" placeholder="Search books..." class="form-control" />
+        </div>
 
-    <input type="text" id="search-input" placeholder="Search books..." class="form-control mb-3">
-
- 
-    <div id="book-list">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Title</th>
-                    <th>Author</th>
-                    <th>Isbn</th>
-                    <th>Publication Date</th>
-                    <th>Genre</th>
-                    <th>Copies</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for book in books %}
-                    <tr class="book-item">
-                        <td>{{ book.id }}</td>
-                        <td>{{ book.title }}</td>
-                        <td>{{ book.author }}</td>
-                        <td>{{ book.isbn }}</td>
-                        <td>{{ book.publicationDate ? book.publicationDate|date('Y-m-d') : '' }}</td>
-                        <td>{{ book.genre }}</td>
-                        <td>{{ book.copies }}</td>
-                        <td>
-                            <a href="{{ path('app_book_show', {'id': book.id}) }}" class="btn btn-sm btn-info">Show</a>
-                            <a href="{{ path('app_book_edit', {'id': book.id}) }}" class="btn btn-sm btn-warning">Edit</a>
-                        </td>
-                    </tr>
-                {% else %}
+        <!-- Book list table -->
+        <div id="book-list" class="mb-4">
+            <table class="table table-bordered table-striped">
+                <thead>
                     <tr>
-                        <td colspan="8" class="text-center">No results found.</td>
+                        <th>Id</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Isbn</th>
+                        <th>Publication Date</th>
+                        <th>Genre</th>
+                        <th>Copies</th>
+                        <th>Actions</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for book in books %}
+                        <tr class="book-item">
+                            <td>{{ book.id }}</td>
+                            <td>{{ book.title }}</td>
+                            <td>{{ book.author }}</td>
+                            <td>{{ book.isbn }}</td>
+                            <td>{{ book.publicationDate ? book.publicationDate|date('Y-m-d') : '' }}</td>
+                            <td>{{ book.genre }}</td>
+                            <td>{{ book.copies }}</td>
+                            <td>
+                                <a href="{{ path('app_book_show', {'id': book.id}) }}" class="btn btn-sm btn-info">Show</a>
+                                <a href="{{ path('app_book_edit', {'id': book.id}) }}" class="btn btn-sm btn-warning">Edit</a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center">No results found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            {% if books|length > 0 %}
+                {{ knp_pagination_render(books) }}
+            {% endif %}
+        </div>
+
+        <!-- Button to create new book -->
+        <a href="{{ path('app_book_new') }}" class="btn btn-primary mt-3">Create new</a>
     </div>
 
+    <!-- AJAX script for real-time search -->
+    <script>
+        const searchInput = document.getElementById('search-input');
 
-    <div class="pagination">
-        {% if books|length > 0 %}
-            {{ knp_pagination_render(books) }}
-        {% endif %}
-    </div>
+        searchInput.addEventListener('input', async function() {
+            const query = searchInput.value;
 
-    <a href="{{ path('app_book_new') }}" class="btn btn-primary">Create new</a>
+            // Send search request to the server
+            const response = await fetch('/book/search?q=' + query);
+            const data = await response.text();
+
+            // Update book list with new filtered content
+            document.getElementById('book-list').innerHTML = data;
+        });
+    </script>
 {% endblock %}

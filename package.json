@@ -4,7 +4,10 @@
         "@babel/preset-env": "^7.16.0",
         "@symfony/webpack-encore": "^5.1.0",
         "core-js": "^3.41.0",
+        "css-loader": "^7.1.2",
         "regenerator-runtime": "^0.13.11",
+        "sass": "^1.87.0",
+        "sass-loader": "^16.0.5",
         "webpack": "^5.99.6",
         "webpack-cli": "^5.1.4"
     },
@@ -34,6 +37,8 @@
     },
     "homepage": "https://github.com/wwiktorass1/library-app#readme",
     "dependencies": {
+        "@popperjs/core": "^2.11.8",
+        "bootstrap": "^5.3.5",
         "jquery": "^3.7.1"
     }
 }
