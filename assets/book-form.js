@@ -40,3 +40,26 @@ $(function () {
         });
     });
 });
+let debounceTimeout;
+
+const searchInput = document.getElementById('search-input');
+const bookList = document.getElementById('book-list');
+
+if (searchInput && bookList) {
+    searchInput.addEventListener('keyup', function () {
+        clearTimeout(debounceTimeout);
+
+        debounceTimeout = setTimeout(() => {
+            const query = encodeURIComponent(this.value);
+            fetch(`/book/search?q=${query}`)
+                .then(response => response.text())
+                .then(html => {
+                    bookList.innerHTML = html;
+                })
+                .catch(err => {
+                    console.error('Search error:', err);
+                    bookList.innerHTML = '<p class="text-danger">Search failed.</p>';
+                });
+        }, 300);
+    });
+}

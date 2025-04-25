@@ -40,7 +40,7 @@ class BookAdditionalEdgeCasesTest extends WebTestCase
         return $user;
     }
 
-    public function testFuturePublicationDate(): void
+        public function testFuturePublicationDate(): void
     {
         $user = $this->createTestUser();
         $this->client->loginUser($user);
@@ -56,7 +56,7 @@ class BookAdditionalEdgeCasesTest extends WebTestCase
         ]);
         $this->client->submit($form);
 
-        $this->assertSelectorTextContains('.publicationDate-error', 'Publication date cannot be in the future.');
+        $this->assertSelectorTextContains('#book_publicationDate + .invalid-feedback li', 'Publication date cannot be in the future.');
     }
 
     public function testEmptyTitle(): void
@@ -75,7 +75,7 @@ class BookAdditionalEdgeCasesTest extends WebTestCase
         ]);
         $this->client->submit($form);
 
-        $this->assertSelectorTextContains('.title-error', 'This value should not be blank');
+        $this->assertSelectorTextContains('#book_title + .invalid-feedback li', 'This value should not be blank.');
     }
 
     public function testTooShortGenre(): void
@@ -94,6 +94,7 @@ class BookAdditionalEdgeCasesTest extends WebTestCase
         ]);
         $this->client->submit($form);
 
-        $this->assertSelectorTextContains('.genre-error', 'This value is too short');
+        $this->assertSelectorTextContains('#book_genre + .invalid-feedback li', 'This value is too short');
     }
+
 }

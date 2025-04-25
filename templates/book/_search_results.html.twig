@@ -1,0 +1,9 @@
+{% if books is empty %}
+    <p>No books found.</p>
+{% else %}
+    <ul>
+        {% for book in books %}
+            <li>{{ book.title }} – {{ book.author }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}

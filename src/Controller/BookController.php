@@ -28,6 +28,7 @@ final class BookController extends AbstractController
             new OA\Response(response: 200, description: 'Returns list of books')
         ]
     )]
+
     public function index(Request $request, BookRepository $bookRepository, PaginatorInterface $paginator): Response
     {
         $queryBuilder = $bookRepository->createQueryBuilder('b');
@@ -72,7 +73,7 @@ final class BookController extends AbstractController
                     return new JsonResponse(['success' => true]);
                 }
     
-                return $this->redirectToRoute('book_index');
+                return $this->redirectToRoute('app_book_index');
             }
     
             if ($request->isXmlHttpRequest()) {

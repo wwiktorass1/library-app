@@ -38,26 +38,42 @@ class BookAjaxValidationTest extends WebTestCase
 
         $this->client->loginUser($user);
 
-        $crawler = $this->client->request('GET', '/book/new');
-        $form = $crawler->selectButton('Save')->form([
-            'book[title]' => '',
-            'book[author]' => '',
-            'book[isbn]' => 'INVALID',
-            'book[publicationDate]' => '2099-01-01',
-            'book[genre]' => 'A',
-            'book[copies]' => -5,
+        // Imituojam AJAX užklausą
+        $this->client->xmlHttpRequest('POST', '/book/new', [
+            'book' => [
+                'title' => '',
+                'author' => '',
+                'isbn' => 'INVALID',
+                'publicationDate' => '2099-01-01',
+                'genre' => 'A',
+                'copies' => -5,
+            ]
         ]);
-
-        $this->client->xmlHttpRequest('POST', '/book/new', $form->getPhpValues());
 
         $response = $this->client->getResponse();
         $this->assertSame(400, $response->getStatusCode());
 
-        $this->assertStringContainsString('title-error', $response->getContent());
-        $this->assertStringContainsString('author-error', $response->getContent());
-        $this->assertStringContainsString('isbn-error', $response->getContent());
-        $this->assertStringContainsString('publicationDate-error', $response->getContent());
-        $this->assertStringContainsString('genre-error', $response->getContent());
-        $this->assertStringContainsString('copies-error', $response->getContent());
+        $data = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('errors', $data);
+
+        $errors = $data['errors'];
+
+        $this->assertArrayHasKey('title', $errors);
+        $this->assertEquals('This value should not be blank.', $errors['title'][0]);
+
+        $this->assertArrayHasKey('author', $errors);
+        $this->assertEquals('This value should not be blank.', $errors['author'][0]);
+
+        $this->assertArrayHasKey('isbn', $errors);
+        $this->assertEquals('Please enter a valid ISBN-13.', $errors['isbn'][0]);
+
+        $this->assertArrayHasKey('publicationDate', $errors);
+        $this->assertEquals('Publication date cannot be in the future.', $errors['publicationDate'][0]);
+
+        $this->assertArrayHasKey('genre', $errors);
+        $this->assertEquals('This value is too short', $errors['genre'][0]);
+
+        $this->assertArrayHasKey('copies', $errors);
+        $this->assertEquals('Copies must be zero or a positive number.', $errors['copies'][0]);
     }
 }

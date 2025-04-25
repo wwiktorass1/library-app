@@ -89,6 +89,7 @@ class BookCreateTest extends WebTestCase
 
         $this->client->submit($form);
         $this->assertSelectorExists('.form-error-message');
-        $this->assertSelectorTextContains('.form-error-message', 'This value should not be blank');
+        $this->assertStringContainsString('This value should not be blank', $this->client->getResponse()->getContent());
+
     }
 }

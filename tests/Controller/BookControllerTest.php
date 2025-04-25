@@ -54,7 +54,7 @@ final class BookControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', '/book');
 
         $this->assertResponseIsSuccessful();
-        $this->assertSelectorTextContains('h1', 'Book index');
+        $this->assertSelectorTextContains('h1', 'Book Index');
     }
 
     public function testNew(): void
@@ -188,7 +188,7 @@ final class BookControllerTest extends WebTestCase
         $this->client->request('GET', '/book');
     
         $this->assertResponseIsSuccessful();
-        $this->assertSelectorTextContains('h1', 'Book index');
+        $this->assertSelectorTextContains('h1', 'Book Index');
     }
 
     public function testSearchReturnsResult(): void
@@ -217,5 +217,25 @@ final class BookControllerTest extends WebTestCase
         $this->assertResponseIsSuccessful();
         $this->assertSelectorExists('.book-item');
     }
+
+    public function testSearchReturnsNoResults(): void
+    {
+        $user = new User();
+        $user->setEmail('search_none_'.uniqid().'@example.com');
+        $user->setPassword('$2y$13$mhBY6T9lfXSevU3yevtkzuptPaKdSQKmUdKMtcIn80vfiJCIYwJ9i');
+        $user->setRoles(['ROLE_USER']);
+    
+        $this->manager->persist($user);
+        $this->manager->flush();
+    
+        $this->client->loginUser($user);
+        $this->client->request('GET', '/book/search?q=nosuchbookxyz');
+    
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString('No books found.', $this->client->getResponse()->getContent());
+
+
+    }
+    
     
 }

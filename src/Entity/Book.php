@@ -42,8 +42,8 @@ class Book
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Assert\NotNull]
-    #[Assert\LessThanOrEqual("today", message: "Publication date cannot be in the future.")]
     #[OA\Property(type: "string", format: "date", example: "2024-01-01")]
+    #[Assert\LessThanOrEqual('today', message: 'Publication date cannot be in the future.')]
     private ?\DateTimeInterface $publicationDate = null;
 
     #[ORM\Column]
