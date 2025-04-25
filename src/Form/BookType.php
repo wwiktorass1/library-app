@@ -7,19 +7,22 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class BookType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('title')
-            ->add('author')
-            ->add('isbn')
-            ->add('publicationDate', DateType::class, [ 
+            ->add('title', TextType::class, [
+                'empty_data' => '',
+            ])
+            ->add('author', TextType::class)
+            ->add('isbn', TextType::class)
+            ->add('publicationDate', DateType::class, [
                 'widget' => 'single_text',
             ])
-            ->add('genre')
+            ->add('genre', TextType::class)
             ->add('copies');
     }
 

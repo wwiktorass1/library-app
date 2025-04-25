@@ -28,7 +28,7 @@ final class BookController extends AbstractController
             new OA\Response(response: 200, description: 'Returns list of books')
         ]
     )]
-
+    #[Route('/book', name: 'book_index')]
     public function index(Request $request, BookRepository $bookRepository, PaginatorInterface $paginator): Response
     {
         $queryBuilder = $bookRepository->createQueryBuilder('b');
@@ -177,13 +177,22 @@ final class BookController extends AbstractController
             new OA\Response(response: 403, description: 'Invalid CSRF token')
         ]
     )]
-    public function delete(Request $request, Book $book, EntityManagerInterface $entityManager): Response
+
+        #[Route('/book/{id}/delete', name: 'book_delete', methods: ['POST'])]
+    public function delete(Request $request, Book $book, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $book->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($book);
-            $entityManager->flush();
+        $submittedToken = $request->request->get('_token');
+        if ($this->isCsrfTokenValid('delete-book-' . $book->getId(), $submittedToken)) {
+            $em->remove($book);
+            $em->flush();
+
+            $this->addFlash('success', 'Book deleted successfully.');
+        } else {
+            $this->addFlash('error', 'Invalid CSRF token.');
         }
 
-        return $this->redirectToRoute('app_book_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('book_index');
     }
+
+
 }

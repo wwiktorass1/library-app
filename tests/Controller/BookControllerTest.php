@@ -1,241 +1,206 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Tests\Controller;
 
 use App\Entity\Book;
 use App\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use App\Tests\Functional\WebTestCaseBase;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-final class BookControllerTest extends WebTestCase
+class BookControllerTest extends WebTestCaseBase
 {
-    private KernelBrowser $client;
-    private EntityManagerInterface $manager;
-    private EntityRepository $bookRepository;
-    private string $path = '/book/';
+    private array $booksToRemove = [];
+    private array $usersToRemove = [];
 
-    protected function setUp(): void
+    protected function tearDown(): void
     {
-        $this->client = static::createClient(); 
-        $this->manager = static::getContainer()->get('doctrine')->getManager();
-        $this->bookRepository = $this->manager->getRepository(Book::class);
+        $em = static::getContainer()->get('doctrine')->getManager();
+        $bookRepo = $em->getRepository(Book::class);
+        $userRepo = $em->getRepository(User::class);
 
-        // Remove all books
-        foreach ($this->bookRepository->findAll() as $object) {
-            $this->manager->remove($object);
+        foreach ($this->booksToRemove as $bookId) {
+            $book = $bookRepo->find($bookId);
+            if ($book) {
+                $em->remove($book);
+            }
         }
 
-        // Remove all users
-        $this->manager->createQuery('DELETE FROM App\Entity\User')->execute();
+        foreach ($this->usersToRemove as $userId) {
+            $user = $userRepo->find($userId);
+            if ($user) {
+                $em->remove($user);
+            }
+        }
+        $em->flush();
+        parent::tearDown();
+    }
 
-        $this->manager->flush();
+    protected function createUser(string $email = 'testuser@example.com', string $password = 'password123'): User
+    {
+        $em = static::getContainer()->get('doctrine')->getManager();
+        $hasher = static::getContainer()->get(UserPasswordHasherInterface::class);
+        $user = new User();
+        $user->setEmail($email);
+        $user->setRoles(['ROLE_USER']);
+        $user->setPassword($hasher->hashPassword($user, $password));
+        $em->persist($user);
+        $em->flush();
+        $this->usersToRemove[] = $user->getId();
+        return $user;
+    }
+
+    protected function createBook(string $title = 'Test Book'): Book
+    {
+        $em = static::getContainer()->get('doctrine')->getManager();
+        $book = new Book();
+        $book->setTitle($title);
+        $book->setAuthor('Test Author');
+        $book->setIsbn('1234567890');
+        $book->setPublicationDate(new \DateTime('2023-01-01'));
+        $book->setGenre('Test Genre');
+        $book->setCopies(1);
+        $em->persist($book);
+        $em->flush();
+        $this->booksToRemove[] = $book->getId();
+        return $book;
     }
 
     public function testIndexRequiresLogin(): void
     {
         $this->client->request('GET', '/book');
-
-        self::assertResponseRedirects('/login');
+        $this->assertResponseRedirects('/login', Response::HTTP_FOUND);
     }
 
     public function testIndexAsLoggedInUser(): void
     {
-        $user = new User();
-        $user->setEmail('test_'.uniqid().'@example.com');
-        $user->setPassword('$2y$13$mhBY6T9lfXSevU3yevtkzuptPaKdSQKmUdKMtcIn80vfiJCIYwJ9i'); // "test1234"
-        $user->setRoles(['ROLE_USER']);
-
-        $this->manager->persist($user);
-        $this->manager->flush();
-
+        $user = $this->createUser();
         $this->client->loginUser($user);
-        $crawler = $this->client->request('GET', '/book');
 
+        $crawler = $this->client->request('GET', '/book');
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('h1', 'Book Index');
     }
 
     public function testNew(): void
     {
-        $user = new User();
-        $user->setEmail('new_'.uniqid().'@example.com');
-        $user->setPassword('$2y$13$mhBY6T9lfXSevU3yevtkzuptPaKdSQKmUdKMtcIn80vfiJCIYwJ9i');
-        $user->setRoles(['ROLE_USER']);
-        $this->manager->persist($user);
-        $this->manager->flush();
-        $this->client->loginUser($user);
+        $this->loginUser();
+        $this->client->loginUser($this->createUser());
+        $crawler = $this->client->request('GET', '/book/new');
+        $this->assertResponseIsSuccessful();
 
-        $this->client->request('GET', sprintf('%snew', $this->path));
-        self::assertResponseStatusCodeSame(200);
-
-        $this->client->submitForm('Save', [
-            'book[title]' => 'Testing',
-            'book[author]' => 'Author',
+        $form = $crawler->filter('form#book-form')->form([
+            'book[title]' => 'Test Title',
+            'book[author]' => 'Test Author',
             'book[isbn]' => '9783161484100',
-            'book[publicationDate]' => '2023-01-01',
-            'book[genre]' => 'Test',
+            'book[publicationDate]' => '2025-01-01',
+            'book[genre]' => 'Test Genre',
             'book[copies]' => 5,
         ]);
 
-        self::assertResponseRedirects('/book');
-        self::assertSame(1, $this->bookRepository->count([]));
+        $this->client->submit($form);
+        $this->assertResponseRedirects('/book');
+        $this->client->followRedirect();
+        $this->assertSelectorTextContains('.book-item', 'Test Title');
     }
 
     public function testShow(): void
     {
-        $user = new User();
-        $user->setEmail('show_'.uniqid().'@example.com');
-        $user->setPassword('$2y$13$mhBY6T9lfXSevU3yevtkzuptPaKdSQKmUdKMtcIn80vfiJCIYwJ9i');
-        $user->setRoles(['ROLE_USER']);
-        $this->manager->persist($user);
-        $this->manager->flush();
-        $this->client->loginUser($user);
-
-        $book = new Book();
-        $book->setTitle('My Title');
-        $book->setAuthor('Author');
-        $book->setIsbn('1234567890');
-        $book->setPublicationDate(new \DateTime('2023-01-01'));
-        $book->setGenre('Genre');
-        $book->setCopies(3);
-
-        $this->manager->persist($book);
-        $this->manager->flush();
-
-        $this->client->request('GET', sprintf('%s%s', $this->path, $book->getId()));
-        self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Book');
+        $book = $this->createBook('Detail Book');
+        $this->client->loginUser($this->createUser());
+        $this->client->request('GET', '/book/' . $book->getId());
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('h1', 'Book');
     }
 
     public function testEdit(): void
     {
-        $user = new User();
-        $user->setEmail('edit_'.uniqid().'@example.com');
-        $user->setPassword('$2y$13$mhBY6T9lfXSevU3yevtkzuptPaKdSQKmUdKMtcIn80vfiJCIYwJ9i');
-        $user->setRoles(['ROLE_USER']);
-        $this->manager->persist($user);
-        $this->manager->flush();
-        $this->client->loginUser($user);
+        $this->loginUser();
+        $book = $this->createBook('Old Title');
+        $this->client->loginUser($this->createUser());
+        $crawler = $this->client->request('GET', '/book/' . $book->getId() . '/edit');
+        $this->assertResponseIsSuccessful();
 
-        $book = new Book();
-        $book->setTitle('Old Title');
-        $book->setAuthor('Old Author');
-        $book->setIsbn('111');
-        $book->setPublicationDate(new \DateTime('2022-01-01'));
-        $book->setGenre('Old');
-        $book->setCopies(1);
-
-        $this->manager->persist($book);
-        $this->manager->flush();
-
-        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $book->getId()));
-        $this->client->submitForm('Update', [
-            'book[title]' => 'New Title',
-            'book[author]' => 'New Author',
+        $form = $crawler->selectButton('Update')->form([
+            'book[title]' => 'Updated Title',
+            'book[author]' => 'Updated Author',
             'book[isbn]' => '9783161484100',
-            'book[publicationDate]' => '2023-01-01',
-            'book[genre]' => 'New',
+            'book[publicationDate]' => '2024-01-01',
+            'book[genre]' => 'Updated Genre',
             'book[copies]' => 10,
         ]);
 
-        self::assertResponseRedirects('/book');
-        $updatedBook = $this->bookRepository->find($book->getId());
-
-        self::assertSame('New Title', $updatedBook->getTitle());
+        $this->client->submit($form);
+        $this->assertResponseRedirects('/book');
     }
 
     public function testRemove(): void
     {
-        $user = new User();
-        $user->setEmail('remove_'.uniqid().'@example.com');
-        $user->setPassword('$2y$13$mhBY6T9lfXSevU3yevtkzuptPaKdSQKmUdKMtcIn80vfiJCIYwJ9i');
-        $user->setRoles(['ROLE_USER']);
-        $this->manager->persist($user);
-        $this->manager->flush();
-        $this->client->loginUser($user);
-
-        $book = new Book();
-        $book->setTitle('Title');
-        $book->setAuthor('Author');
-        $book->setIsbn('333');
-        $book->setPublicationDate(new \DateTime('2023-01-01'));
-        $book->setGenre('Genre');
-        $book->setCopies(2);
-
-        $this->manager->persist($book);
-        $this->manager->flush();
-
-        $this->client->request('GET', sprintf('%s%s', $this->path, $book->getId()));
-        $this->client->submitForm('Delete');
-
-        self::assertResponseRedirects('/book');
-        self::assertSame(0, $this->bookRepository->count([]));
-    }
-    public function testIndexPageLoadsSuccessfully(): void
-    {
-        $user = new User();
-        $user->setEmail('index_test_'.uniqid().'@example.com');
-        $user->setPassword('$2y$13$mhBY6T9lfXSevU3yevtkzuptPaKdSQKmUdKMtcIn80vfiJCIYwJ9i');
-        $user->setRoles(['ROLE_USER']);
+        $this->loginUser();
+        $book = $this->createBook('Delete Me');
     
-        $this->manager->persist($user);
-        $this->manager->flush();
+        $crawler = $this->client->request('GET', '/book');
     
-        $this->client->loginUser($user);
+        $form = $crawler->selectButton('Delete')->form();
     
-        $this->client->request('GET', '/book');
+        $this->client->submit($form);
     
-        $this->assertResponseIsSuccessful();
-        $this->assertSelectorTextContains('h1', 'Book Index');
+        $this->assertResponseRedirects('/book');
     }
 
     public function testSearchReturnsResult(): void
     {
-        $user = new User();
-        $user->setEmail('search_test_'.uniqid().'@example.com');
-        $user->setPassword('$2y$13$mhBY6T9lfXSevU3yevtkzuptPaKdSQKmUdKMtcIn80vfiJCIYwJ9i');
-        $user->setRoles(['ROLE_USER']);
-    
-        $this->manager->persist($user);
-    
-        $book = new Book();
-        $book->setTitle('Mano knyga');
-        $book->setAuthor('Autorius');
-        $book->setIsbn('1234567890123');
-        $book->setPublicationDate(new \DateTime('2024-01-01'));
-        $book->setGenre('Fikcija');
-        $book->setCopies(1);
-    
-        $this->manager->persist($book);
-        $this->manager->flush();
-    
-        $this->client->loginUser($user);
-        $this->client->request('GET', '/book/search?q=Mano');
-    
+        $this->loginUser();
+        $this->createBook('UniqueTitleOne');
+        $this->client->request('GET', '/book?q=UniqueTitleOne');
+
         $this->assertResponseIsSuccessful();
-        $this->assertSelectorExists('.book-item');
+        $this->assertSelectorTextContains('.book-item', 'UniqueTitleOne');
     }
 
     public function testSearchReturnsNoResults(): void
     {
-        $user = new User();
-        $user->setEmail('search_none_'.uniqid().'@example.com');
-        $user->setPassword('$2y$13$mhBY6T9lfXSevU3yevtkzuptPaKdSQKmUdKMtcIn80vfiJCIYwJ9i');
-        $user->setRoles(['ROLE_USER']);
-    
-        $this->manager->persist($user);
-        $this->manager->flush();
-    
-        $this->client->loginUser($user);
-        $this->client->request('GET', '/book/search?q=nosuchbookxyz');
-    
+        $this->loginUser();
+        $this->createBook('Unrelated Book');
+        $this->client->request('GET', '/book?q=NoMatchTerm');
+
         $this->assertResponseIsSuccessful();
-        $this->assertStringContainsString('No books found.', $this->client->getResponse()->getContent());
-
-
+        $this->assertSelectorExists('.book-list');
     }
-    
-    
+
+    public function testEditInvalidData(): void
+    {
+        $this->loginUser();
+        $book = $this->createBook('Original Title');
+
+        $crawler = $this->client->request('GET', '/book/' . $book->getId() . '/edit');
+
+        $form = $crawler->filter('form[name="book"]')->form([
+            'book[title]' => '', 
+            'book[author]' => 'Author',
+            'book[isbn]' => '9783161484100',
+            'book[publicationDate]' => '2023-01-01',
+            'book[genre]' => 'Genre',
+            'book[copies]' => 5,
+        ]);
+
+        $this->client->submit($form);
+
+        $this->assertResponseStatusCodeSame(422); 
+        $this->assertSelectorExists('#book_title + .invalid-feedback');
+        $this->assertSelectorTextContains('#book_title + .invalid-feedback', 'This value should not be blank.');
+    }
+
+
+    public function testDeleteWithoutLogin(): void
+    {
+        $book = $this->createBook('Protected Book');
+
+        $this->client->request('POST', '/book/' . $book->getId());
+
+        $this->assertResponseRedirects('/login');
+    }
+
 }

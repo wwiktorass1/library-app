@@ -12,7 +12,7 @@
         </div>
 
         <!-- Book list table -->
-        <div id="book-list" class="mb-4">
+        <div id="book-list" class="book-list mb-4">
             <table class="table table-bordered table-striped">
                 <thead>
                     <tr>
@@ -36,9 +36,13 @@
                             <td>{{ book.publicationDate ? book.publicationDate|date('Y-m-d') : '' }}</td>
                             <td>{{ book.genre }}</td>
                             <td>{{ book.copies }}</td>
-                            <td>
+                            <td class="d-flex gap-1">
                                 <a href="{{ path('app_book_show', {'id': book.id}) }}" class="btn btn-sm btn-info">Show</a>
                                 <a href="{{ path('app_book_edit', {'id': book.id}) }}" class="btn btn-sm btn-warning">Edit</a>
+                                        <form method="post" action="{{ path('book_delete', {id: book.id}) }}" onsubmit="return confirm('Are you sure?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete-book-' ~ book.id) }}">
+                                            <button class="btn btn-danger">Delete</button>
+                                        </form>
                             </td>
                         </tr>
                     {% else %}
@@ -65,14 +69,10 @@
     <script>
         const searchInput = document.getElementById('search-input');
 
-        searchInput.addEventListener('input', async function() {
+        searchInput.addEventListener('input', async function () {
             const query = searchInput.value;
-
-            // Send search request to the server
-            const response = await fetch('/book/search?q=' + query);
+            const response = await fetch('/book/search?q=' + encodeURIComponent(query));
             const data = await response.text();
-
-            // Update book list with new filtered content
             document.getElementById('book-list').innerHTML = data;
         });
     </script>
