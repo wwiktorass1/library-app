@@ -1,4 +1,3 @@
-
 # 📚 Library App
 
 This is a Symfony-based Library Management web application.
@@ -16,6 +15,7 @@ This is a Symfony-based Library Management web application.
 - ✅ AJAX-powered dynamic search
 - ✅ Pagination for book listing
 - ✅ AJAX form submission with validation errors shown inline
+- ✅ OpenAPI 3 / Swagger API documentation
 
 ---
 
@@ -113,10 +113,6 @@ Run all functional and controller tests:
 docker exec -it library_app-php-1 php bin/phpunit
 ```
 
----
-
-## 🧪 Running Tests
-
 Test classes are located under `tests/`:
 
 - `Functional/` – covers form rendering, CRUD actions
@@ -127,6 +123,21 @@ You can extend tests to include:
 - Form validation errors
 - AJAX response handling
 - Edge cases (e.g., empty inputs, invalid ISBNs)
+
+---
+
+## ✅ Test Status
+
+All functional tests are passing:
+
+- **10 tests**  
+- **30 assertions**
+
+Run tests with:
+
+```bash
+docker compose exec php php bin/phpunit
+```
 
 ---
 
@@ -184,7 +195,7 @@ Password: `test1234`
 
 ---
 
-## 🎯 Final Notes
+## 🌟 Final Notes
 
 This app is great as a base for learning Symfony, testing, and frontend/backend integration.  
 Feel free to fork, customize, and extend it as needed!
@@ -195,7 +206,7 @@ Feel free to fork, customize, and extend it as needed!
 
 ---
 
-## 📘 API Documentation (OpenAPI / Swagger)
+## 📘️ API Documentation (OpenAPI / Swagger)
 
 This project includes full API documentation using **NelmioApiDocBundle** and the **OpenAPI 3** specification.
 
@@ -237,7 +248,7 @@ Response: partial HTML rendered with matching books
 
 ---
 
-## 📐 Architectural decisions
+## 📊 Architectural decisions
 
 This project follows **Symfony best practices** with clear separation of concerns:
 
@@ -285,3 +296,4 @@ docker exec -it <container_id> php bin/console cache:warmup
 - 📱 **Mobile Responsiveness**: Table view can be adapted to cards for better display
 - 🧪 **Test Coverage**: Needs more validation, edge-case and integration tests
 - 📘 **More API Examples**: Swagger UI exists, but README lacks example payloads
+
