@@ -13,6 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Knp\Component\Pager\PaginatorInterface;
 use OpenApi\Attributes as OA;
 use Nelmio\ApiDocBundle\Attribute\Model;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[OA\Tag(name: 'Books')]
 final class BookController extends AbstractController
@@ -61,27 +62,32 @@ final class BookController extends AbstractController
         $book = new Book();
         $form = $this->createForm(BookType::class, $book);
         $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($book);
-            $entityManager->flush();
-
-            if ($request->isXmlHttpRequest()) {
-                return new Response(null, 201); 
+    
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                $entityManager->persist($book);
+                $entityManager->flush();
+    
+                if ($request->isXmlHttpRequest()) {
+                    return new JsonResponse(['success' => true]);
+                }
+    
+                return $this->redirectToRoute('book_index');
             }
-
-            return $this->redirectToRoute('app_book_index');
+    
+            if ($request->isXmlHttpRequest()) {
+                $errors = [];
+                foreach ($form->getErrors(true) as $error) {
+                    $field = $error->getOrigin()->getName();
+                    $errors[$field][] = $error->getMessage();
+                }
+    
+                return new JsonResponse(['errors' => $errors], 400);
+            }
         }
-
-        if ($request->isXmlHttpRequest()) {
-            return $this->render('book/_form.html.twig', [
-                'form' => $form,
-            ], new Response('', 400));
-        }
-
+    
         return $this->render('book/new.html.twig', [
-            'book' => $book,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 

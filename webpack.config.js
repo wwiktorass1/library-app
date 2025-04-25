@@ -7,8 +7,8 @@ if (!Encore.isRuntimeEnvironmentConfigured()) {
 Encore
     .setOutputPath('public/build/')
     .setPublicPath('/build')
-    .addEntry('app', './assets/app.js') // Patikrinkite, ar nurodytas teisingas kelias į app.js
-    .enableSassLoader()  // Patikrinkite, ar reikia Sass/SCSS
+    .addEntry('app', './assets/app.js') 
+    .enableSassLoader()  
     .splitEntryChunks()
     .enableSingleRuntimeChunk()
     .cleanupOutputBeforeBuild()
