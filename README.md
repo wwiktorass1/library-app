@@ -1,3 +1,4 @@
+
 # 📚 Library App
 
 This is a Symfony-based Library Management web application.
@@ -114,20 +115,18 @@ docker exec -it library_app-php-1 php bin/phpunit
 
 ---
 
-## 🧪 Functional Tests
+## 🧪 Running Tests
 
-This project includes tests for:
+Test classes are located under `tests/`:
 
-- ✅ Creating books with valid & invalid data
-- ✅ AJAX book search results
-- ✅ Book listing with pagination
-- ✅ Form validation errors
+- `Functional/` – covers form rendering, CRUD actions
+- `Controller/Api/` – covers API endpoints and responses
 
-Test structure:
+You can extend tests to include:
 
-- Uses `WebTestCase` and `KernelBrowser`
-- `book` and `user` tables are truncated before each test
-- Test user: `naujokas@example.com` / `test1234`
+- Form validation errors
+- AJAX response handling
+- Edge cases (e.g., empty inputs, invalid ISBNs)
 
 ---
 
@@ -214,27 +213,27 @@ This project includes full API documentation using **NelmioApiDocBundle** and th
 | `PUT`    | `/book/{id}/edit`    | Update an existing book                  |
 | `DELETE` | `/book/{id}`         | Delete a book                            |
 
-### How to Access
-
-Make sure your Docker environment is running and the application is accessible at `http://localhost:8000`. Then navigate to `/api/doc` in your browser to view the Swagger interface.
-
 ---
 
-## 📡 AJAX Form Submission
+### 📡 Example API Usage
 
-This project supports asynchronous (AJAX) form submission for book creation:
+#### Create a Book (AJAX-style)
+```http
+POST /book/new
+Content-Type: application/x-www-form-urlencoded
 
-- When submitted via JavaScript (`XMLHttpRequest`), the `/book/new` endpoint:
-  - Returns `204 No Content` on successful creation.
-  - Returns `400 Bad Request` and renders form partial with validation errors if input is invalid.
-
-Example error response (partial HTML):
-
-```html
-<div class="form-error-message text-danger title-error">
-    This value should not be blank
-</div>
+book[title]=Ajax+Book&book[author]=Me&book[isbn]=1234567890
 ```
+
+- ✅ Response: `204 No Content` if valid
+- ❌ Response: `400 Bad Request` with form errors (HTML)
+
+#### Search Books (AJAX-style)
+```http
+GET /book/search?q=history
+```
+
+Response: partial HTML rendered with matching books
 
 ---
 
@@ -242,12 +241,12 @@ Example error response (partial HTML):
 
 This project follows **Symfony best practices** with clear separation of concerns:
 
-- **MVC pattern** is used to isolate business logic (`Controller`, `Entity`, `Twig`).
-- **Service layer** handles logic beyond controllers (e.g., data processing, validation).
-- **Repository pattern** is used for custom queries and search logic.
-- **FormType classes** help encapsulate form and validation logic.
-- **Doctrine ORM** handles all data persistence with proper constraints.
-- **AJAX interactions** are handled via `XMLHttpRequest` and Symfony responses.
+- **MVC pattern** is used to isolate business logic (`Controller`, `Entity`, `Twig`)
+- **Service layer** handles logic beyond controllers (e.g., data processing, validation)
+- **Repository pattern** is used for custom queries and search logic
+- **FormType classes** help encapsulate form and validation logic
+- **Doctrine ORM** handles all data persistence with proper constraints
+- **AJAX interactions** are handled via `XMLHttpRequest` and Symfony responses
 - **Validation is layered**:
   - Entity-level constraints (e.g., `@Assert`)
   - Form-level error rendering
@@ -270,24 +269,19 @@ This project follows **Symfony best practices** with clear separation of concern
 
 This application can be deployed using Docker on any cloud platform:
 
-### 1. Build and run the Docker container
-
 ```bash
-# Build the Docker image
 docker build -t library-app .
-
-# Run the container in production mode
 docker run -d -p 8000:8000 -e APP_ENV=prod library-app
-```
-
-### 2. After the container is running:
-
-```bash
-# Run database migrations
 docker exec -it <container_id> php bin/console doctrine:migrations:migrate --no-interaction
-
-# Warm up the cache
 docker exec -it <container_id> php bin/console cache:warmup
 ```
 
-> Replace `<container_id>` with the actual container ID from `docker ps`.
+---
+
+## 🚧 Known Limitations & To Be Improved
+
+- 🔄 **AJAX Form Submission**: Currently reloads page; should use JavaScript-based submission
+- 🔍 **AJAX Search**: Search can be improved with live results update without reload
+- 📱 **Mobile Responsiveness**: Table view can be adapted to cards for better display
+- 🧪 **Test Coverage**: Needs more validation, edge-case and integration tests
+- 📘 **More API Examples**: Swagger UI exists, but README lacks example payloads
