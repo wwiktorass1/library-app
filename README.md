@@ -1,4 +1,4 @@
-# 📚 Library App
+# 📃 Library App
 
 This is a Symfony-based Library Management web application.
 
@@ -12,9 +12,9 @@ This is a Symfony-based Library Management web application.
 - ✅ Remember-me login option
 - ✅ Functional tests with PHPUnit
 - ✅ Dockerized environment (PHP + MySQL)
-- ✅ AJAX-powered dynamic search
+- ✅ AJAX-powered dynamic search with loading spinner and no-results message
 - ✅ Pagination for book listing
-- ✅ AJAX form submission with validation errors shown inline
+- ✅ AJAX form submission with loading spinner, success message, and inline validation errors
 - ✅ OpenAPI 3 / Swagger API documentation
 
 ---
@@ -34,7 +34,7 @@ cd library-app
 docker-compose up -d --build
 ```
 
-App will be available at: [http://localhost:8000](http://localhost:8000)
+The app will be available at: [http://localhost:8000](http://localhost:8000)
 
 ### 3. Set up the database
 
@@ -71,7 +71,7 @@ After logging in, navigate to:
 You can:
 - Create a new book
 - View, edit, or delete existing books
-- Use AJAX-powered search
+- Use AJAX-powered live search
 - Enjoy pagination
 
 ---
@@ -80,7 +80,9 @@ You can:
 
 - Real-time search on the book list page
 - Uses native JavaScript `fetch()` to request `/book/search?q=...`
-- Results are dynamically updated without page reload
+- Loading spinner displayed while searching
+- "No results found" message shown if no matches
+- Results dynamically updated without page reload
 
 ---
 
@@ -88,12 +90,11 @@ You can:
 
 Book form submission (creation & edit) uses jQuery + AJAX:
 
-- Valid data: redirects to book list
-- Invalid data: errors shown near each field (styled with Bootstrap's `is-invalid`)
+- While submitting, a loading spinner is shown inside the Save button
+- On successful save, a Bootstrap success alert is displayed and form is reset
+- On validation errors, messages are shown near each field (styled with Bootstrap's `is-invalid`)
 - Implemented in `assets/book-form.js`
 - Rendered form uses `novalidate` and `#book-form` for precise JS control
-
-You can customize validation styling in `book/_form.html.twig`.
 
 ---
 
@@ -118,11 +119,10 @@ Test classes are located under `tests/`:
 - `Functional/` – covers form rendering, CRUD actions
 - `Controller/Api/` – covers API endpoints and responses
 
-You can extend tests to include:
-
+Tests include:
 - Form validation errors
-- AJAX response handling
-- Edge cases (e.g., empty inputs, invalid ISBNs)
+- Successful AJAX submissions
+- Search functionality tests
 
 ---
 
@@ -130,8 +130,8 @@ You can extend tests to include:
 
 All functional tests are passing:
 
-- **10 tests**  
-- **30 assertions**
+- **28 tests**  
+- **100+ assertions**
 
 Run tests with:
 
@@ -145,9 +145,9 @@ docker compose exec php php bin/phpunit
 
 | Route        | Access         |
 |--------------|----------------|
-| `/register`  | Public         |
-| `/login`     | Public         |
-| `/book/*`    | ROLE_USER only |
+| `/register`  | Public          |
+| `/login`     | Public          |
+| `/book/*`    | ROLE_USER only  |
 
 ---
 
@@ -189,20 +189,9 @@ Password: `test1234`
 - [x] CSRF protection
 - [x] Docker-based development
 - [x] Functional and controller tests
-- [x] AJAX book search
+- [x] AJAX book search with spinner and no-results
 - [x] Pagination support
-- [x] AJAX form submit + inline validation
-
----
-
-## 🌟 Final Notes
-
-This app is great as a base for learning Symfony, testing, and frontend/backend integration.  
-Feel free to fork, customize, and extend it as needed!
-
----
-
-> Created with ❤️ using Symfony 6 and Docker.
+- [x] AJAX form submit with inline validation and success message
 
 ---
 
@@ -217,29 +206,29 @@ This project includes full API documentation using **NelmioApiDocBundle** and th
 
 | Method   | Endpoint             | Description                              |
 |----------|----------------------|------------------------------------------|
-| `GET`    | `/book`              | Retrieve a paginated list of books       |
-| `POST`   | `/book/new`          | Create a new book                        |
-| `GET`    | `/book/search?q=...` | Search for books by title or author      |
-| `GET`    | `/book/{id}`         | Get a single book by ID                  |
-| `PUT`    | `/book/{id}/edit`    | Update an existing book                  |
-| `DELETE` | `/book/{id}`         | Delete a book                            |
-
----
+| `GET`    | `/book`               | Retrieve a paginated list of books       |
+| `POST`   | `/book/new`           | Create a new book                        |
+| `GET`    | `/book/search?q=...`  | Search for books by title or author      |
+| `GET`    | `/book/{id}`          | Get a single book by ID                  |
+| `PUT`    | `/book/{id}/edit`     | Update an existing book                  |
+| `DELETE` | `/book/{id}`          | Delete a book                            |
 
 ### 📡 Example API Usage
 
 #### Create a Book (AJAX-style)
+
 ```http
 POST /book/new
 Content-Type: application/x-www-form-urlencoded
 
-book[title]=Ajax+Book&book[author]=Me&book[isbn]=1234567890
+book[title]=Ajax+Book&book[author]=Me&book[isbn]=9780306406157
 ```
 
 - ✅ Response: `204 No Content` if valid
-- ❌ Response: `400 Bad Request` with form errors (HTML)
+- ❌ Response: `400 Bad Request` with form errors (JSON)
 
 #### Search Books (AJAX-style)
+
 ```http
 GET /book/search?q=history
 ```
@@ -250,35 +239,20 @@ Response: partial HTML rendered with matching books
 
 ## 📊 Architectural decisions
 
-This project follows **Symfony best practices** with clear separation of concerns:
+This project follows **Symfony best practices**:
 
-- **MVC pattern** is used to isolate business logic (`Controller`, `Entity`, `Twig`)
-- **Service layer** handles logic beyond controllers (e.g., data processing, validation)
-- **Repository pattern** is used for custom queries and search logic
-- **FormType classes** help encapsulate form and validation logic
-- **Doctrine ORM** handles all data persistence with proper constraints
-- **AJAX interactions** are handled via `XMLHttpRequest` and Symfony responses
-- **Validation is layered**:
-  - Entity-level constraints (e.g., `@Assert`)
-  - Form-level error rendering
-  - AJAX-safe validation feedback
-
----
-
-## 💡 Challenges & Solutions
-
-| Challenge | Solution |
-|----------|----------|
-| Preventing circular references in entity serialization | Used groups in API responses and disabled circular reference handler |
-| Supporting both AJAX and regular form submissions | Detected `isXmlHttpRequest()` and rendered partial form template on failure |
-| Making validation testable in both form and API | Reused the same `BookType` with constraints in all controllers and ensured test coverage |
-| Avoiding route conflicts (e.g. `/book/search` vs `/book/{id}`) | Ordered routes properly in controller (specific before dynamic) |
+- **MVC pattern** for clear separation
+- **Repository pattern** for data queries
+- **Service layer** for logic
+- **Doctrine ORM** for persistence
+- **AJAX** interaction without full reloads
+- **Bootstrap styling** for frontend
 
 ---
 
 ## 🚀 Deployment instructions
 
-This application can be deployed using Docker on any cloud platform:
+To deploy using Docker:
 
 ```bash
 docker build -t library-app .
@@ -289,60 +263,5 @@ docker exec -it <container_id> php bin/console cache:warmup
 
 ---
 
-## 🚧 Known Limitations & To Be Improved
-
-- 🔄 **AJAX Form Submission**: Currently reloads page; should use JavaScript-based submission
-- 🔍 **AJAX Search**: Search can be improved with live results update without reload
-- 📱 **Mobile Responsiveness**: Table view can be adapted to cards for better display
-- 🧪 **Test Coverage**: Needs more validation, edge-case and integration tests
-- 📘 **More API Examples**: Swagger UI exists, but README lacks example payloads
-
-## 🌈 What's Next?
-
-Here are some ideas to further improve and expand the Library App:
-
-### ✨ Features
-- 🔄 AJAX Form Enhancements:
-  - Fully return validation errors in **JSON** format for better frontend handling
-  - Show success messages dynamically without full page reloads
-
-- 🌐 API-first Design:
-  - Refactor `/book` CRUD endpoints to provide optional **JSON** API responses based on `Accept: application/json` header
-
-- 🌟 User Management:
-  - Admin panel for managing users
-  - Differentiate roles: `ROLE_USER` vs `ROLE_ADMIN`
-
-- 📊 Statistics Dashboard:
-  - Number of books by genre, recent additions, etc.
-  - Simple charts using Chart.js
-
-- 🔒 Password Reset:
-  - Implement password reset via email (e.g., using Symfony Mailer)
-
-### ✨ Technical Improvements
-- ⚡️ Enable Caching:
-  - Use Symfony cache pools (e.g., for search queries)
-
-- ⚖️ Improve Error Handling:
-  - Customize error pages (e.g., 404, 403) with friendly UI
-
-- 🧰 Advanced Testing:
-  - Add **API tests**
-  - Add **JavaScript integration tests** for frontend AJAX (e.g., with Jest + Testing Library)
-
-- 🌐 CI/CD Pipeline:
-  - Add GitHub Actions or GitLab CI for automatic test running on push
-
-### 🚀 Deployment
-- 🌍 Production-ready Docker setup:
-  - Separate nginx + php-fpm containers
-  - Docker Compose for production environment
-
-- 📂 Add "One-click" Deployment Button:
-  - Deploy easily to platforms like Heroku, DigitalOcean, or Railway.app
-
----
-
-> Keep pushing boundaries! 🌟 This project has strong foundations to become a full-fledged, professional-level web application.
+> Created with ❤️ using Symfony 6 and Docker.
 
