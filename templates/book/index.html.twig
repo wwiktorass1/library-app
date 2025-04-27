@@ -39,10 +39,12 @@
                             <td class="d-flex gap-1">
                                 <a href="{{ path('app_book_show', {'id': book.id}) }}" class="btn btn-sm btn-info">Show</a>
                                 <a href="{{ path('app_book_edit', {'id': book.id}) }}" class="btn btn-sm btn-warning">Edit</a>
-                                        <form method="post" action="{{ path('book_delete', {id: book.id}) }}" onsubmit="return confirm('Are you sure?');">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('delete-book-' ~ book.id) }}">
-                                            <button class="btn btn-danger">Delete</button>
-                                        </form>
+                                <form class="delete-book-form d-inline" method="post"
+                                      data-id="{{ book.id }}"
+                                      data-url="{{ path('book_delete', {id: book.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete-book-' ~ book.id) }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
                             </td>
                         </tr>
                     {% else %}
@@ -64,16 +66,23 @@
         <!-- Button to create new book -->
         <a href="{{ path('app_book_new') }}" class="btn btn-primary mt-3">Create new</a>
     </div>
+{% endblock %}
 
-    <!-- AJAX script for real-time search -->
+{% block javascripts %}
+    {{ parent() }}
+
     <script>
         const searchInput = document.getElementById('search-input');
 
-        searchInput.addEventListener('input', async function () {
-            const query = searchInput.value;
-            const response = await fetch('/book/search?q=' + encodeURIComponent(query));
-            const data = await response.text();
-            document.getElementById('book-list').innerHTML = data;
-        });
+        if (searchInput) {
+            searchInput.addEventListener('input', async function () {
+                const query = searchInput.value;
+                const response = await fetch('/book/search?q=' + encodeURIComponent(query));
+                const data = await response.text();
+                document.getElementById('book-list').innerHTML = data;
+            });
+        }
     </script>
+
+    <script src="{{ asset('build/book-delete.js') }}"></script>
 {% endblock %}

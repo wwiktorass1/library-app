@@ -70,7 +70,7 @@ final class BookController extends AbstractController
                 $entityManager->flush();
     
                 if ($request->isXmlHttpRequest()) {
-                    return new JsonResponse(['success' => true]);
+                    return new JsonResponse(['success' => true], Response::HTTP_CREATED);
                 }
     
                 return $this->redirectToRoute('app_book_index');
@@ -83,14 +83,14 @@ final class BookController extends AbstractController
                     $errors[$field][] = $error->getMessage();
                 }
     
-                return new JsonResponse(['errors' => $errors], 400);
+                return new JsonResponse(['errors' => $errors], Response::HTTP_BAD_REQUEST);
             }
         }
     
         return $this->render('book/new.html.twig', [
             'form' => $form->createView(),
         ]);
-    }
+    }    
 
     #[Route('/book/search', name: 'app_book_search', methods: ['GET'])]
     #[OA\Get(
@@ -149,22 +149,40 @@ final class BookController extends AbstractController
             new OA\Response(response: 400, description: 'Invalid input')
         ]
     )]
-    public function edit(Request $request, Book $book, EntityManagerInterface $entityManager): Response
+    #[Route('/book/{id}/edit', name: 'book_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Book $book, EntityManagerInterface $em): Response
     {
         $form = $this->createForm(BookType::class, $book);
         $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_book_index', [], Response::HTTP_SEE_OTHER);
+    
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                $em->flush();
+    
+                if ($request->isXmlHttpRequest()) {
+                    return new JsonResponse(['success' => true]);
+                }
+    
+                return $this->redirectToRoute('book_index');
+            }
+    
+            if ($request->isXmlHttpRequest()) {
+                $errors = [];
+                foreach ($form->getErrors(true) as $error) {
+                    $field = $error->getOrigin()->getName();
+                    $errors[$field][] = $error->getMessage();
+                }
+    
+                return new JsonResponse(['errors' => $errors], Response::HTTP_BAD_REQUEST);
+            }
         }
-
+    
         return $this->render('book/edit.html.twig', [
             'book' => $book,
             'form' => $form,
         ]);
     }
+    
 
     #[Route('/book/{id}', name: 'app_book_delete', methods: ['POST'])]
     #[OA\Delete(

@@ -7,7 +7,6 @@
         <div class="col-md-8">
             <h1 class="mb-4">Create a New Book</h1>
 
-            {# Papildomas konteineris klaidoms, kad testai galėtų rasti .form-error-message #}
             <div id="form-errors" class="form-error-message text-danger mb-3"></div>
 
             <div id="form-container">
@@ -15,4 +14,9 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('build/book-form.js') }}"></script>
 {% endblock %}
