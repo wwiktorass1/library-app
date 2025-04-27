@@ -105,8 +105,12 @@ final class BookController extends AbstractController
     public function search(Request $request, BookRepository $bookRepository): Response
     {
         $query = $request->query->get('q', '');
-        $books = $bookRepository->searchByTitleOrAuthor($query);
-
+        $books = [];
+    
+        if (!empty($query)) {
+            $books = $bookRepository->searchByTitleOrAuthor($query);
+        }
+    
         return $this->render('book/_list.html.twig', [
             'books' => $books,
         ]);

@@ -73,13 +73,32 @@
 
     <script>
         const searchInput = document.getElementById('search-input');
+        const bookList = document.getElementById('book-list');
+        let searchTimeout = null;
 
         if (searchInput) {
-            searchInput.addEventListener('input', async function () {
-                const query = searchInput.value;
-                const response = await fetch('/book/search?q=' + encodeURIComponent(query));
-                const data = await response.text();
-                document.getElementById('book-list').innerHTML = data;
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimeout);
+
+                searchTimeout = setTimeout(async () => {
+                    const query = searchInput.value.trim();
+
+                    bookList.innerHTML = '<div class="text-center my-4"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+
+                    try {
+                        const response = await fetch('/book/search?q=' + encodeURIComponent(query));
+                        const data = await response.text();
+
+                        if (data.trim() === '') {
+                            bookList.innerHTML = '<div class="alert alert-warning text-center my-4">No results found.</div>';
+                        } else {
+                            bookList.innerHTML = data;
+                        }
+                    } catch (error) {
+                        console.error('Search failed', error);
+                        bookList.innerHTML = '<div class="alert alert-danger text-center my-4">Error while searching.</div>';
+                    }
+                }, 300); // 300ms debounce
             });
         }
     </script>
