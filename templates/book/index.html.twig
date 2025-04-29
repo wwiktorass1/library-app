@@ -2,6 +2,24 @@
 
 {% block title %}Book index{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .hover-shadow {
+            transition: all 0.3s ease;
+        }
+        .hover-shadow:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            transform: translateY(-5px);
+        }
+        .card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     <div class="container">
         <h1 class="my-4">Book Index</h1>
@@ -11,49 +29,9 @@
             <input type="text" id="search-input" placeholder="Search books..." class="form-control" />
         </div>
 
-        <!-- Book list table -->
+        <!-- Book list cards -->
         <div id="book-list" class="book-list mb-4">
-            <table class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Title</th>
-                        <th>Author</th>
-                        <th>Isbn</th>
-                        <th>Publication Date</th>
-                        <th>Genre</th>
-                        <th>Copies</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for book in books %}
-                        <tr class="book-item">
-                            <td>{{ book.id }}</td>
-                            <td>{{ book.title }}</td>
-                            <td>{{ book.author }}</td>
-                            <td>{{ book.isbn }}</td>
-                            <td>{{ book.publicationDate ? book.publicationDate|date('Y-m-d') : '' }}</td>
-                            <td>{{ book.genre }}</td>
-                            <td>{{ book.copies }}</td>
-                            <td class="d-flex gap-1">
-                                <a href="{{ path('app_book_show', {'id': book.id}) }}" class="btn btn-sm btn-info">Show</a>
-                                <a href="{{ path('app_book_edit', {'id': book.id}) }}" class="btn btn-sm btn-warning">Edit</a>
-                                <form class="delete-book-form d-inline" method="post"
-                                      data-id="{{ book.id }}"
-                                      data-url="{{ path('book_delete', {id: book.id}) }}">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete-book-' ~ book.id) }}">
-                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="8" class="text-center">No results found.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            {% include 'book/_list.html.twig' %}
         </div>
 
         <!-- Pagination -->

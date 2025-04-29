@@ -1,14 +1,16 @@
 {% for book in books %}
     {% if book.id %}
-        <div class="book-item border rounded p-2 mb-2">
-            <strong>{{ book.title|e }}</strong> by {{ book.author|e }}<br>
-            ISBN: {{ book.isbn|e }} | Genre: {{ book.genre|e }}<br>
-            Publication: {{ book.publicationDate ? book.publicationDate|date('Y-m-d') : 'N/A' }}
-            <div class="mt-2">
-                <a href="{{ path('app_book_show', {'id': book.id}) }}" class="btn btn-sm btn-outline-info">Show</a>
-                <a href="{{ path('app_book_edit', {'id': book.id}) }}" class="btn btn-sm btn-outline-warning">Edit</a>
+        <a href="{{ path('app_book_show', {'id': book.id}) }}" class="card-link">
+            <div class="book-item border rounded p-3 mb-3 hover-shadow">
+                <strong>{{ book.title|e }}</strong> by {{ book.author|e }}<br>
+                ISBN: {{ book.isbn|e }} | Genre: {{ book.genre|e }}<br>
+                Publication: {{ book.publicationDate ? book.publicationDate|date('Y-m-d') : 'N/A' }}
+                <div class="mt-2 d-flex gap-2">
+                    <a href="{{ path('app_book_show', {'id': book.id}) }}" class="btn btn-sm btn-outline-primary">Show</a>
+                    <a href="{{ path('app_book_edit', {'id': book.id}) }}" class="btn btn-sm btn-outline-success">Edit</a>
+                </div>
             </div>
-        </div>
+        </a>
     {% else %}
         <div class="text-danger">⚠️ Book has no ID — cannot show or edit</div>
     {% endif %}
