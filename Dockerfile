@@ -12,37 +12,16 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 
-COPY composer.json composer.lock symfony.lock ./
-
-
-RUN composer install --no-dev --no-scripts --no-autoloader
-
-
 COPY . .
 
 
-RUN if [ ! -f "public/.htaccess" ]; then \
-    echo "Creating default .htaccess"; \
-    printf 'Options -MultiViews\nRewriteEngine On\nRewriteCond %%{REQUEST_FILENAME} !-f\nRewriteRule ^(.*)$ index.php [QSA,L]\n' > public/.htaccess; \
-    fi
+RUN mkdir -p var/cache var/log && \
+    chmod -R 777 var/cache var/log && \
+    chmod +x bin/console
 
 
-RUN chmod +x bin/console && \
-    mkdir -p var/cache var/log && \
-    chmod -R 777 var/cache var/log
-
-
-RUN composer dump-autoload --optimize --no-dev && \
+RUN composer install --no-dev --optimize-autoloader && \
     php bin/console cache:clear --no-warmup
 
 
-RUN if [ -f "assets/app.js" ]; then \
-    apt-get update && \
-    apt-get install -y nodejs npm && \
-    npm install -g yarn && \
-    yarn install && \
-    yarn build; \
-    fi
-
-
-CMD ["sh", "-c", "php bin/console cache:clear && php -S 0.0.0.0:8080 public/index.php"]
+CMD ["sh", "-c", "php -S 0.0.0.0:$PORT public/index.php"]
