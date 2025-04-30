@@ -14,8 +14,9 @@ WORKDIR /var/www
 
 COPY . .
 
-
-RUN composer install --no-dev --optimize-autoloader
+RUN composer dump-env prod \
+    && composer install --no-dev --optimize-autoloader \
+    && php bin/console cache:clear
 
 
 EXPOSE 8000
