@@ -22,4 +22,5 @@ RUN composer install --no-dev --optimize-autoloader \
 EXPOSE 8000
 
 
-CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]
+CMD ["sh", "-c", "php -S 0.0.0.0:$PORT -t public"]
+
