@@ -8,6 +8,7 @@ RUN apt-get update && \
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+
 WORKDIR /var/www/html
 
 
@@ -36,6 +37,12 @@ RUN composer dump-autoload --optimize --no-dev && \
 
 
 RUN if [ -f "assets/app.js" ]; then \
+    apt-get update && \
     apt-get install -y nodejs npm && \
     npm install -g yarn && \
-    yarn install &&
+    yarn install && \
+    yarn build; \
+    fi
+
+
+CMD ["sh", "-c", "php bin/console cache:clear && php -S 0.0.0.0:8080 public/index.php"]
