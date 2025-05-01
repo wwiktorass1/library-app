@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 final class BookController extends AbstractController
 {
     #[Route('/book', name: 'app_book_index', methods: ['GET'])]
+
     #[OA\Get(
         summary: 'Get paginated list of books',
         parameters: [
@@ -28,7 +29,7 @@ final class BookController extends AbstractController
             new OA\Response(response: 200, description: 'Returns list of books')
         ]
     )]
-    #[Route('/book', name: 'book_index')]
+
     public function index(Request $request, BookRepository $bookRepository, PaginatorInterface $paginator): Response
     {
         $queryBuilder = $bookRepository->createQueryBuilder('b');

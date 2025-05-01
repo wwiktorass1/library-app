@@ -1,43 +1,37 @@
-FROM php:8.2-cli
+# Build stage
+FROM composer:2.6 AS builder
 
-
-RUN apt-get update && \
-    apt-get install -y git unzip libicu-dev zlib1g-dev libzip-dev libonig-dev libxml2-dev libpq-dev \
-    && docker-php-ext-install intl pdo pdo_mysql zip
-
-
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-WORKDIR /var/www/html
-
-
+WORKDIR /app
 COPY composer.json composer.lock symfony.lock ./
-
-
-RUN composer require symfony/flex --no-plugins --no-scripts
-
-
-RUN composer install --no-dev --no-scripts --no-autoloader
-
+RUN composer install --no-dev --no-autoloader --no-scripts --ignore-platform-reqs
 
 COPY . .
+RUN composer dump-autoload --optimize --no-dev
 
+# Runtime stage
+FROM php:8.2-fpm-alpine
 
-RUN chmod +x bin/console && \
-    mkdir -p var/cache var/log && \
-    chmod -R 777 var/cache var/log
+# Install dependencies
+RUN apk add --no-cache \
+    icu-dev \
+    libzip-dev \
+    && docker-php-ext-install -j$(nproc) \
+    intl \
+    pdo_mysql \
+    zip
 
-RUN git config --global --add safe.directory /var/www/html
+WORKDIR /var/www/html
+COPY --from=builder /app .
+COPY --from=builder /app/public public/
 
-RUN composer require symfony/framework-bundle doctrine/annotations
+# Permissions
+RUN mkdir -p var/cache var/log \
+    && chown -R www-data:www-data var \
+    && chmod -R 777 var/cache var/log
 
+# Entrypoint
+COPY docker/railway/entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["entrypoint.sh"]
 
-RUN composer dump-autoload --optimize --no-dev && \
-    php bin/console cache:clear --no-warmup
-
-RUN composer install --no-dev --optimize-autoloader \
-    && php bin/console cache:clear \
-    && php bin/console doctrine:migrations:migrate --no-interaction
-
-
-    CMD ["sh", "-c", "php -S 0.0.0.0:$PORT public/index.php"]
+CMD ["php", "-S", "0.0.0.0:8000", "public/index.php"]
