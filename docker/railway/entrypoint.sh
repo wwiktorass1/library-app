@@ -1,20 +1,28 @@
 #!/bin/sh
 set -e
 
-# Nustatome default PORT reikšmę jei neegzistuoja
-export PORT=${PORT:-8000}
-
-# Laukiama kol bus pasiruošę duomenų bazės kintamieji
-sleep 5
-
-# Migracijos
-if [ -n "${DATABASE_URL}" ]; then
-    php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
+# Naudojamas PORT (Railway nustato jį automatiškai)
+if [ "$PORT" = "" ]; then
+  PORT=8000
 fi
 
-# Cache valymas
-php bin/console cache:clear
-php bin/console cache:warmup
+echo "Using PORT from environment: $PORT"
 
-# Paleidžiamas serveris
-exec php -S 0.0.0.0:$PORT public/index.php
+# Aplinkos kintamųjų tikrinimas
+if [ "$DATABASE_URL" != "" ]; then
+  echo "Using DATABASE_URL from environment"
+fi
+
+if [ "$APP_ENV" = "prod" ]; then
+  echo "Running in production mode"
+  php bin/console cache:clear --no-warmup
+  php bin/console cache:warmup
+fi
+
+if [ "$RUN_MIGRATIONS" = "true" ]; then
+  echo "Running database migrations"
+  php bin/console doctrine:migrations:migrate --no-interaction
+fi
+
+# Galiausiai paleidžiam PHP built-in serverį
+exec php -S 0.0.0.0:$PORT -t public/
